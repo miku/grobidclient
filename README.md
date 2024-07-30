@@ -1,12 +1,12 @@
 # grobidclient
 
-Go client for [grobid](https://github.com/kermitt2/grobid).
+Go client library and CLI for [grobid](https://github.com/kermitt2/grobid). **This is not fully functional yet.**
 
 
 ## Usage
 
 ```
-./grobidcli -h
+$ grobidcli -h
 
 ░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
 ▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
@@ -55,4 +55,11 @@ valid service names:
   -tei
         add pdf coordinates
   -v    be verbose
+```
+
+Process a single PDF.
+
+```
+$ grobidcli -f fixtures/062RoisinAronAmericanNaturalist03.pdf
+
 ```
