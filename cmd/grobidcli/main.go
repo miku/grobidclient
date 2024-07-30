@@ -112,10 +112,13 @@ func main() {
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("running...")
 	result, err := grobid.ProcessPDF("fixtures/062RoisinAronAmericanNaturalist03.pdf", *serviceName, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(result)
+	if result.StatusCode == 200 {
+		fmt.Println(result)
+	} else {
+		log.Fatal(result)
+	}
 }
