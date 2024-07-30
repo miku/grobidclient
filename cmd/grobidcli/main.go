@@ -109,6 +109,7 @@ func main() {
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
+		OutputDir:              *outputDir,
 	}
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
