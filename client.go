@@ -19,6 +19,7 @@ import (
 	"sync"
 )
 
+// ValidServices, see also: https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services
 var ValidServices = []string{
 	"processFulltextDocument",
 	"processHeaderDocument",
@@ -28,6 +29,7 @@ var ValidServices = []string{
 	"processCitationPatentPDF",
 }
 
+// IsValidService returns true, if the service name is valid.
 func IsValidService(name string) bool {
 	for _, v := range ValidServices {
 		if v == name {
@@ -37,12 +39,15 @@ func IsValidService(name string) bool {
 	return false
 }
 
+// ErrInvalidService, if the service name is not known.
 var ErrInvalidService = errors.New("invalid service")
 
+// Doer is a minimal, local HTTP client abstraction.
 type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
+// Grobid client, embedding an HTTP client for flexibility.
 type Grobid struct {
 	Server string
 	Client Doer
@@ -68,6 +73,7 @@ type Result struct {
 	Body       []byte
 }
 
+// String representation of a result.
 func (r *Result) String() string {
 	return fmt.Sprintf("%d on %s, body: %s", r.StatusCode, r.Filename, string(r.Body))
 }
@@ -135,8 +141,9 @@ func outputFilename(filepath string) string {
 	return path.Join(dir, fn)
 }
 
-// ProcessDirRecursive takes a directory, finds all files that look like PDF
-// files or text files and processes them.
+// ProcessDirRecursive takes a directory name, finds all files that look like
+// PDF files and processes them. TODO: also process select text files, and
+// patents; also we should use context for cancellation here.
 func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *Options) error {
 	var (
 		pathC   = make(chan string)
@@ -160,7 +167,8 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 			}
 		}()
 	}
-	// process results
+	// TODO: actually do something with the result, e.g. write them to a
+	// adjacent file.
 	resultWorker := func() {
 		for result := range resultC {
 			log.Printf("got result [%d]: %v", result.StatusCode, result.Filename)
@@ -177,7 +185,6 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		}
 		select {
 		case pathC <- path:
-			// send to workers, todo: use context
 		case err := <-errC:
 			return err
 		}
@@ -191,10 +198,12 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 }
 
 func isPDF(filename string) bool {
+	// TODO: could also do some content type snooping.
 	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
 }
 
-// ProcessPDF processes a single PDF with given options.
+// ProcessPDF processes a single PDF with given options. Result contains the
+// HTTP status code, indicating success or failure.
 func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, error) {
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
