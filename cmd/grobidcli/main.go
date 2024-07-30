@@ -91,14 +91,14 @@ func main() {
 	}
 	grobid := grobidclient.Grobid{
 		Server: *server,
-		Client: http.DefaultClient,
+		Client: http.DefaultClient, // TODO: timeouts
 	}
 	if *doPing {
 		fmt.Printf("grobid service at %s status: %s -- %s\n",
 			*server, grobid.Pingmoji(), time.Now().Format(time.RFC1123))
 		os.Exit(0)
 	}
-	opts := grobidclient.Options{
+	opts := &grobidclient.Options{
 		GenerateIDs:            *generateIDs,
 		ConsolidateHeader:      *consolidateHeader,
 		ConsolidateCitations:   *consolidateCitations,
@@ -109,8 +109,13 @@ func main() {
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
 	}
-	log.Println(opts)
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("running...")
+	result, err := grobid.ProcessPDF("fixtures/062RoisinAronAmericanNaturalist03.pdf", *serviceName, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(result)
 }

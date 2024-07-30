@@ -65,6 +65,10 @@ type Result struct {
 	Body       []byte
 }
 
+func (r *Result) String() string {
+	return fmt.Sprintf("%d on %s, body: %s", r.StatusCode, r.Filename, string(r.Body))
+}
+
 // writeFields writes set flags to a writer.
 func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.ConsolidateCitations {
@@ -169,7 +173,8 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 		return nil, err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	req.Header.Set("Accept", "text/plain")
+	// req.Header.Set("Accept", "text/plain")
+	req.Header.Set("Accept", "application/xml")
 	resp, err := g.Client.Do(req)
 	if err != nil {
 		return nil, err
