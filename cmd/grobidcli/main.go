@@ -17,10 +17,11 @@ import (
 var (
 	server      = flag.String("S", "http://localhost:8070", "server URL")
 	serviceName = flag.String("s", "processFulltextDocument", "a valid service name")
-	inputDir    = flag.String("d", ".", "input directory to look for PDF, txt, or XML files")
+	inputFile   = flag.String("f", "", "single input file to process")
+	inputDir    = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
 	outputDir   = flag.String("O", "", "output directory to write parsed files to")
 	configFile  = flag.String("c", "config.json", "path to config file")
-	numWorkers  = flag.Int("n", runtime.NumCPU(), "number of concurrent requests")
+	numWorkers  = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
 	doPing      = flag.Bool("P", false, "do a ping")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
@@ -28,7 +29,7 @@ var (
 	consolidateHeader      = flag.Bool("ch", false, "consolidate header")
 	includeRawCitations    = flag.Bool("irc", false, "include raw citations")
 	includeRawAffiliations = flag.Bool("ira", false, "include raw affiliations")
-	forceReprocess         = flag.Bool("f", false, "force reprocess")
+	forceReprocess         = flag.Bool("force", false, "force reprocess")
 	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
 	verbose                = flag.Bool("v", false, "be verbose")
@@ -112,13 +113,24 @@ func main() {
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
 	}
-	result, err := grobid.ProcessPDF("fixtures/062RoisinAronAmericanNaturalist03.pdf", *serviceName, opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.StatusCode == 200 {
-		fmt.Println(result)
-	} else {
-		log.Fatal(result)
+	switch {
+	case *inputFile != "":
+		result, err := grobid.ProcessPDF(*inputFile, *serviceName, opts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if result.StatusCode == 200 {
+			fmt.Println(result)
+		} else {
+			log.Fatal(result)
+		}
+	case *inputDir != "":
+		log.Printf("scanning %s", *inputDir)
+		err := grobid.ProcessDirRecursive(*inputDir, *serviceName, *numWorkers, opts)
+		if err != nil {
+			log.Fatal(err)
+		}
+	default:
+		log.Println("file or directory required")
 	}
 }

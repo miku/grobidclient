@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -14,6 +16,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var ValidServices = []string{
@@ -58,7 +61,7 @@ type Options struct {
 	Verbose                bool
 }
 
-// Result is returned from ProcessText services.
+// Result is returned from ProcessText services, not necessarily successful.
 type Result struct {
 	Filename   string
 	StatusCode int
@@ -130,6 +133,65 @@ func outputFilename(filepath string) string {
 		fn  = withoutExt(filepath) + ext
 	)
 	return path.Join(dir, fn)
+}
+
+// ProcessDirRecursive takes a directory, finds all files that look like PDF
+// files or text files and processes them.
+func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *Options) error {
+	var (
+		pathC   = make(chan string)
+		resultC = make(chan *Result)
+		errC    = make(chan error)
+		wg      sync.WaitGroup
+		done    = make(chan bool)
+	)
+	// start N workers, TODO: cancellation
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for path := range pathC {
+				result, err := g.ProcessPDF(path, service, opts)
+				if err != nil {
+					errC <- err
+					break
+				}
+				resultC <- result
+			}
+		}()
+	}
+	// process results
+	resultWorker := func() {
+		for result := range resultC {
+			log.Printf("got result [%d]: %v", result.StatusCode, result.Filename)
+		}
+		done <- true
+	}
+	go resultWorker()
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !isPDF(path) {
+			return nil
+		}
+		select {
+		case pathC <- path:
+			// send to workers, todo: use context
+		case err := <-errC:
+			return err
+		}
+		return nil
+	})
+	close(pathC)
+	wg.Wait()
+	close(resultC)
+	<-done
+	return err
+}
+
+func isPDF(filename string) bool {
+	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
 }
 
 // ProcessPDF processes a single PDF with given options.
