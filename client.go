@@ -25,7 +25,7 @@ var ValidServices = []string{
 	"processCitationPatentPDF",
 }
 
-func isValidService(name string) bool {
+func IsValidService(name string) bool {
 	for _, v := range ValidServices {
 		if v == name {
 			return true
@@ -122,7 +122,7 @@ func outputFilename(filepath string) string {
 
 // ProcessPDF processes a single PDF with given options.
 func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, error) {
-	if !isValidService(service) {
+	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
 	serviceURL, err := url.JoinPath(g.Server, "api", service)
@@ -184,7 +184,7 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 
 // ProcessText processes a single text file with given options.
 func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, error) {
-	if !isValidService(service) {
+	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
 	serviceURL, err := url.JoinPath(g.Server, "api", service)
