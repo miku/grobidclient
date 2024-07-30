@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/miku/grobidclient"
 )
@@ -18,6 +21,7 @@ var (
 	outputDir   = flag.String("O", "", "output directory to write parsed files to")
 	configFile  = flag.String("c", "config.json", "path to config file")
 	numWorkers  = flag.Int("n", runtime.NumCPU(), "number of concurrent requests")
+	doPing      = flag.Bool("P", false, "do a ping")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
@@ -30,14 +34,43 @@ var (
 	verbose                = flag.Bool("v", false, "be verbose")
 )
 
+type Config struct {
+	BatchSize    int64    `json:"batch_size"`
+	Coordinates  []string `json:"coordinates"`
+	GrobidServer string   `json:"grobid_server"`
+	SleepTime    int64    `json:"sleep_time"`
+	Timeout      int64    `json:"timeout"`
+}
+
+func (c *Config) FromFile(filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, c)
+}
+
+var DefaultConfig = &Config{
+	BatchSize:    100,
+	Coordinates:  []string{"persName", "figure", "ref", "biblStruct", "formula", "s", "note", "title"},
+	Timeout:      60,
+	SleepTime:    5,
+	GrobidServer: "http://localhost:8070",
+}
+
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, `
-░░      ░░░       ░░░░      ░░░       ░░░        ░░░      ░░░  ░░░░░░░░        ░
-▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
-▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
-█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ███████████  ████
-██      ███  ████  ███      ███       ███        ███      ███        ██        █
+░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
+▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
+▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
+█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
+██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
                                                                                 `)
 		fmt.Fprintln(os.Stderr, "valid service names:\n")
 		for _, s := range grobidclient.ValidServices {
@@ -50,9 +83,34 @@ func main() {
 	if !grobidclient.IsValidService(*serviceName) {
 		log.Fatal("invalid service name")
 	}
+	config := DefaultConfig
+	if *configFile != "" {
+		if err := config.FromFile(*configFile); err != nil {
+			log.Fatal(err)
+		}
+	}
 	grobid := grobidclient.Grobid{
 		Server: *server,
 		Client: http.DefaultClient,
 	}
-	log.Println(grobid)
+	if *doPing {
+		fmt.Printf("grobid service at %s status: %s -- %s\n",
+			*server, grobid.Pingmoji(), time.Now().Format(time.RFC1123))
+		os.Exit(0)
+	}
+	opts := grobidclient.Options{
+		GenerateIDs:            *generateIDs,
+		ConsolidateHeader:      *consolidateHeader,
+		ConsolidateCitations:   *consolidateCitations,
+		IncludeRawCitations:    *includeRawCitations,
+		IncluseRawAffiliations: *includeRawAffiliations,
+		TEICoordinates:         *teiCoordinates,
+		SegmentSentences:       *segmentSentences,
+		Force:                  *forceReprocess,
+		Verbose:                *verbose,
+	}
+	log.Println(opts)
+	if err := grobid.Ping(); err != nil {
+		log.Fatal(err)
+	}
 }

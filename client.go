@@ -107,6 +107,14 @@ func (g *Grobid) Ping() error {
 	return nil
 }
 
+// Pingmoji returns an emoji version of ping.
+func (g *Grobid) Pingmoji() string {
+	if g.Ping() == nil {
+		return "✅"
+	}
+	return "⛔"
+}
+
 func withoutExt(filepath string) string {
 	return strings.TrimSuffix(filepath, path.Ext(filepath))
 }
