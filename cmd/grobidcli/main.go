@@ -172,6 +172,6 @@ func main() {
 			log.Fatal(err)
 		}
 	default:
-		log.Println("file or directory required")
+		log.Println("file (-f) or directory (-d) required")
 	}
 }
