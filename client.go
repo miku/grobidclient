@@ -166,7 +166,6 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 	var (
 		pathC   = make(chan string)
 		resultC = make(chan *Result)
-		errC    = make(chan error)
 		wg      sync.WaitGroup
 		done    = make(chan error)
 	)
@@ -181,10 +180,10 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		go func() {
 			defer wg.Done()
 			for path := range pathC {
-				if g.isAlreadyProcessed(path) && !opts.Force {
+				if g.isAlreadyProcessed(path, opts) && !opts.Force {
 					continue
 				}
-				result, err := g.ProcessPDFContext(ctx, path, service, opts)
+				result, err := g.ProcessPDF(path, service, opts)
 				result.Err = err
 				resultC <- result
 			}
