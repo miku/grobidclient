@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -91,6 +90,7 @@ type Result struct {
 	SHA1       string
 	StatusCode int
 	Body       []byte
+	Err        error
 }
 
 // StringBody returns the response body as string.
@@ -152,6 +152,13 @@ func outputFilename(filepath, dir string) string {
 	}
 }
 
+// isAlreadyProcessed returns true, if the file at a given path has been processed.
+func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
+	name := outputFilename(path, opts.OutputDir)
+	_, err := os.Stat(name)
+	return err == nil
+}
+
 // ProcessDirRecursive takes a directory name, finds all files that look like
 // PDF files and processes them. TODO: also process select text files, and
 // patents; also we should use context for cancellation here.
@@ -161,7 +168,7 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		resultC = make(chan *Result)
 		errC    = make(chan error)
 		wg      sync.WaitGroup
-		done    = make(chan bool)
+		done    = make(chan error)
 	)
 	if opts.OutputDir != "" {
 		if err := os.MkdirAll(opts.OutputDir, 0755); err != nil {
@@ -174,16 +181,11 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		go func() {
 			defer wg.Done()
 			for path := range pathC {
-				name := outputFilename(path, opts.OutputDir)
-				if _, err := os.Stat(name); err == nil && !opts.Force {
-					log.Printf("already processed: %v", name)
+				if g.isAlreadyProcessed(path) && !opts.Force {
 					continue
 				}
-				result, err := g.ProcessPDF(path, service, opts)
-				if err != nil {
-					errC <- err
-					break
-				}
+				result, err := g.ProcessPDFContext(ctx, path, service, opts)
+				result.Err = err
 				resultC <- result
 			}
 		}()
@@ -192,13 +194,16 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 	// adjacent file.
 	resultWorker := func() {
 		for result := range resultC {
+			if result.Err != nil {
+				continue
+			}
 			name := outputFilename(result.Filename, opts.OutputDir)
 			if err := os.WriteFile(name, result.Body, 0644); err != nil {
-				log.Println(err)
+				done <- err
+				return
 			}
-			log.Printf("got result [%d]: %v", result.StatusCode, result.Filename)
 		}
-		done <- true
+		done <- nil
 	}
 	go resultWorker()
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
@@ -208,17 +213,16 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		if !isPDF(path) {
 			return nil
 		}
-		select {
-		case pathC <- path:
-		case err := <-errC:
-			return err
-		}
+		pathC <- path
 		return nil
 	})
 	close(pathC)
 	wg.Wait()
 	close(resultC)
-	<-done
+	workerErr := <-done
+	if workerErr != nil {
+		return workerErr
+	}
 	return err
 }
 
