@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/miku/grobidclient"
+	"github.com/sethgrid/pester"
 )
 
 var (
