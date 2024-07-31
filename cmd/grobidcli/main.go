@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
@@ -33,15 +34,29 @@ var (
 	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
 	verbose                = flag.Bool("v", false, "be verbose")
-	timeout                = flag.Duration("T", 8*time.Second, "retry timeout")
+	maxRetries             = flag.Int("r", 10, "max retries")
+	timeout                = flag.Duration("T", 60*time.Second, "client timeout")
 )
 
+// Config is taken from the Python client implementation, which differs a bit.
+// We do not need sleep time (handled by exponential backoff), and batch size.
+//
+// If a config file is present, server, timeout and coordinates are taken from
+// the file.
 type Config struct {
 	BatchSize    int64    `json:"batch_size"`
 	Coordinates  []string `json:"coordinates"`
 	GrobidServer string   `json:"grobid_server"`
 	SleepTime    int64    `json:"sleep_time"`
 	Timeout      int64    `json:"timeout"`
+}
+
+func (c *Config) TimeoutDuration() time.Duration {
+	dur, err := time.ParseDuration(fmt.Sprintf("%ds", c.Timeout))
+	if err != nil {
+		panic(err)
+	}
+	return dur
 }
 
 func (c *Config) FromFile(filename string) error {
@@ -58,11 +73,11 @@ func (c *Config) FromFile(filename string) error {
 }
 
 var DefaultConfig = &Config{
-	BatchSize:    100,
+	BatchSize:    100, // unused
 	Coordinates:  []string{"persName", "figure", "ref", "biblStruct", "formula", "s", "note", "title"},
 	Timeout:      60,
-	SleepTime:    5,
-	GrobidServer: "http://localhost:8070",
+	SleepTime:    5, // unused
+	GrobidServer: *server,
 }
 
 func main() {
@@ -90,10 +105,14 @@ func main() {
 		if err := config.FromFile(*configFile); err != nil {
 			log.Fatal(err)
 		}
+		*server = config.GrobidServer
+		*timeout = config.TimeoutDuration()
 	}
-	client := pester.New()
-	client.Concurrency = 1
-	client.MaxRetries = 10
+	hc := &http.Client{
+		Timeout: *timeout,
+	}
+	client := pester.NewExtendedClient(hc)
+	client.MaxRetries = *maxRetries
 	client.Backoff = pester.ExponentialBackoff
 	client.RetryOnHTTP429 = true
 	grobid := grobidclient.Grobid{
