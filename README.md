@@ -32,6 +32,8 @@ valid service names:
   -P    do a ping
   -S string
         server URL (default "http://localhost:8070")
+  -T duration
+        client timeout (default 1m0s)
   -c string
         path to config file (default "config.json")
   -cc
@@ -51,7 +53,9 @@ valid service names:
   -irc
         include raw citations
   -n int
-        number of concurrent workers (default 16)
+        number of concurrent workers (default 4)
+  -r int
+        max retries (default 10)
   -s string
         a valid service name (default "processFulltextDocument")
   -ss
