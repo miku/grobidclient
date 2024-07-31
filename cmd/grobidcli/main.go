@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"runtime"
 	"time"
 
 	"github.com/miku/grobidclient"
+	"github.com/sethgrid/pester"
 )
 
 var (
-	server      = flag.String("S", "http://localhost:8070", "server URL")
+	server      = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
 	serviceName = flag.String("s", "processFulltextDocument", "a valid service name")
 	inputFile   = flag.String("f", "", "single input file to process")
 	inputDir    = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
@@ -33,6 +33,7 @@ var (
 	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
 	verbose                = flag.Bool("v", false, "be verbose")
+	timeout                = flag.Duration("T", 8*time.Second, "retry timeout")
 )
 
 type Config struct {
@@ -90,9 +91,14 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	client := pester.New()
+	client.Concurrency = 1
+	client.MaxRetries = 10
+	client.Backoff = pester.ExponentialBackoff
+	client.RetryOnHTTP429 = true
 	grobid := grobidclient.Grobid{
 		Server: *server,
-		Client: http.DefaultClient, // TODO: timeouts
+		Client: client,
 	}
 	if *doPing {
 		fmt.Printf("grobid service at %s status: %s -- %s\n",

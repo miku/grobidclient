@@ -271,7 +271,6 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 		return nil, err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	// req.Header.Set("Accept", "text/plain")
 	req.Header.Set("Accept", "application/xml")
 	resp, err := g.Client.Do(req)
 	if err != nil {
