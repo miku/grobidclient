@@ -63,6 +63,8 @@ valid service names:
   -tei
         add pdf coordinates
   -v    be verbose
+  -version
+        show version
 ```
 
 Process a single PDF.
