@@ -3,6 +3,7 @@ package grobidclient
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,12 +48,6 @@ type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-// Grobid client, embedding an HTTP client for flexibility.
-type Grobid struct {
-	Server string
-	Client Doer
-}
-
 // Options are grobid API options.
 type Options struct {
 	GenerateIDs            bool
@@ -65,23 +60,6 @@ type Options struct {
 	Force                  bool
 	Verbose                bool
 	OutputDir              string
-}
-
-// Result is returned from ProcessText services, not necessarily successful.
-type Result struct {
-	Filename   string
-	StatusCode int
-	Body       []byte
-}
-
-// StringBody returns the response body as string.
-func (r *Result) StringBody() string {
-	return string(r.Body)
-}
-
-// String representation of a result.
-func (r *Result) String() string {
-	return fmt.Sprintf("%d on %s, body: %s", r.StatusCode, r.Filename, string(r.Body))
 }
 
 // writeFields writes set flags to a writer.
@@ -104,6 +82,29 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.SegmentSentences {
 		w.WriteField("segmentSentences", "1")
 	}
+}
+
+// Result is returned from ProcessText services, not necessarily successful.
+type Result struct {
+	Filename   string
+	StatusCode int
+	Body       []byte
+}
+
+// StringBody returns the response body as string.
+func (r *Result) StringBody() string {
+	return string(r.Body)
+}
+
+// String representation of a result.
+func (r *Result) String() string {
+	return fmt.Sprintf("%d on %s, body: %s", r.StatusCode, r.Filename, string(r.Body))
+}
+
+// Grobid client, embedding an HTTP client for flexibility.
+type Grobid struct {
+	Server string
+	Client Doer
 }
 
 // Ping tests the server connection.
@@ -224,9 +225,7 @@ func isPDF(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
 }
 
-// ProcessPDF processes a single PDF with given options. Result contains the
-// HTTP status code, indicating success or failure.
-func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, error) {
+func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string, opts *Options) (*Result, error) {
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
@@ -261,7 +260,7 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 		}
 		errC <- nil
 	}()
-	req, err := http.NewRequest("POST", serviceURL, pr)
+	req, err := http.NewRequestWithContext(ctx, "POST", serviceURL, pr)
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +284,12 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 		Body:       b,
 	}
 	return result, nil
+}
+
+// ProcessPDF processes a single PDF with given options. Result contains the
+// HTTP status code, indicating success or failure.
+func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, error) {
+	return g.ProcessPDFContext(context.TODO(), filename, service, opts)
 }
 
 // ProcessText processes a single text file with given options.
