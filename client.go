@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -84,9 +85,10 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 	}
 }
 
-// Result is returned from ProcessText services, not necessarily successful.
+// Result wraps a server response, not necessarily successful.
 type Result struct {
 	Filename   string
+	SHA1       string
 	StatusCode int
 	Body       []byte
 }
@@ -236,6 +238,7 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 	var (
 		pr, pw = io.Pipe()
 		mw     = multipart.NewWriter(pw)
+		h      = sha1.New()
 		errC   = make(chan error)
 	)
 	go func() {
@@ -249,7 +252,8 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 		if err != nil {
 			errC <- err
 		}
-		if _, err := io.Copy(part, f); err != nil {
+		tee := io.TeeReader(f, h)
+		if _, err := io.Copy(part, tee); err != nil {
 			errC <- err
 		}
 		if err := mw.Close(); err != nil {
@@ -280,6 +284,7 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 	}
 	result := &Result{
 		Filename:   filename,
+		SHA1:       fmt.Sprintf("%x", h.Sum(nil)),
 		StatusCode: resp.StatusCode,
 		Body:       b,
 	}
