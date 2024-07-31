@@ -7,6 +7,10 @@ all: $(TARGETS)
 %: cmd/%/main.go
 	go build -o $@ $<
 
+.PHONY: test
+test:
+	go test -cover -v .
+
 .PHONY: clean
 clean:
 	rm -f $(TARGETS)
