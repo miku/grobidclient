@@ -20,6 +20,8 @@ import (
 	"sync"
 )
 
+var Version = "0.1.0"
+
 // ValidServices, see also: https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services
 var ValidServices = []string{
 	"processFulltextDocument",

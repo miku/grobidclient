@@ -36,6 +36,7 @@ var (
 	verbose                = flag.Bool("v", false, "be verbose")
 	maxRetries             = flag.Int("r", 10, "max retries")
 	timeout                = flag.Duration("T", 60*time.Second, "client timeout")
+	showVersion            = flag.Bool("version", false, "show version")
 )
 
 // Config is taken from the Python client implementation, which differs a bit.
@@ -97,6 +98,10 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	if *showVersion {
+		fmt.Println(grobidclient.Version)
+		os.Exit(1)
+	}
 	if !grobidclient.IsValidService(*serviceName) {
 		log.Fatal("invalid service name")
 	}
