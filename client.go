@@ -270,10 +270,10 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if err := <-errC; err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
