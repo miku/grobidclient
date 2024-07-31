@@ -112,9 +112,18 @@ func main() {
 		Timeout: *timeout,
 	}
 	client := pester.NewExtendedClient(hc)
-	client.MaxRetries = *maxRetries
-	client.Backoff = pester.ExponentialBackoff
-	client.RetryOnHTTP429 = true
+	switch {
+	case *doPing:
+		// Ping should come back fast.
+		hc.Timeout = 5 * time.Second
+		client.MaxRetries = 1
+		client.Backoff = pester.ExponentialBackoff
+		client.RetryOnHTTP429 = false
+	default:
+		client.MaxRetries = *maxRetries
+		client.Backoff = pester.ExponentialBackoff
+		client.RetryOnHTTP429 = true
+	}
 	grobid := grobidclient.Grobid{
 		Server: *server,
 		Client: client,
