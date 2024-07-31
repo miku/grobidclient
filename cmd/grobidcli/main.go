@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	server      = flag.String("S", "http://localhost:8070", "server URL")
+	server      = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
 	serviceName = flag.String("s", "processFulltextDocument", "a valid service name")
 	inputFile   = flag.String("f", "", "single input file to process")
 	inputDir    = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
@@ -33,14 +33,29 @@ var (
 	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
 	verbose                = flag.Bool("v", false, "be verbose")
+	maxRetries             = flag.Int("r", 10, "max retries")
+	timeout                = flag.Duration("T", 60*time.Second, "client timeout")
 )
 
+// Config is taken from the Python client implementation, which differs a bit.
+// We do not need sleep time (handled by exponential backoff), and batch size.
+//
+// If a config file is present, server, timeout and coordinates are taken from
+// the file.
 type Config struct {
 	BatchSize    int64    `json:"batch_size"`
 	Coordinates  []string `json:"coordinates"`
 	GrobidServer string   `json:"grobid_server"`
 	SleepTime    int64    `json:"sleep_time"`
 	Timeout      int64    `json:"timeout"`
+}
+
+func (c *Config) TimeoutDuration() time.Duration {
+	dur, err := time.ParseDuration(fmt.Sprintf("%ds", c.Timeout))
+	if err != nil {
+		panic(err)
+	}
+	return dur
 }
 
 func (c *Config) FromFile(filename string) error {
@@ -57,11 +72,11 @@ func (c *Config) FromFile(filename string) error {
 }
 
 var DefaultConfig = &Config{
-	BatchSize:    100,
+	BatchSize:    100, // unused
 	Coordinates:  []string{"persName", "figure", "ref", "biblStruct", "formula", "s", "note", "title"},
 	Timeout:      60,
-	SleepTime:    5,
-	GrobidServer: "http://localhost:8070",
+	SleepTime:    5, // unused
+	GrobidServer: *server,
 }
 
 func main() {
@@ -89,10 +104,19 @@ func main() {
 		if err := config.FromFile(*configFile); err != nil {
 			log.Fatal(err)
 		}
+		*server = config.GrobidServer
+		*timeout = config.TimeoutDuration()
 	}
+	hc := &http.Client{
+		Timeout: *timeout,
+	}
+	client := pester.NewExtendedClient(hc)
+	client.MaxRetries = *maxRetries
+	client.Backoff = pester.ExponentialBackoff
+	client.RetryOnHTTP429 = true
 	grobid := grobidclient.Grobid{
 		Server: *server,
-		Client: http.DefaultClient, // TODO: timeouts
+		Client: client,
 	}
 	if *doPing {
 		fmt.Printf("grobid service at %s status: %s -- %s\n",
@@ -109,6 +133,7 @@ func main() {
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
+		OutputDir:              *outputDir,
 	}
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
@@ -120,7 +145,8 @@ func main() {
 			log.Fatal(err)
 		}
 		if result.StatusCode == 200 {
-			fmt.Println(result)
+			log.Printf("file: %s", result.Filename)
+			fmt.Println(result.StringBody())
 		} else {
 			log.Fatal(result)
 		}

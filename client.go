@@ -64,6 +64,7 @@ type Options struct {
 	SegmentSentences       bool
 	Force                  bool
 	Verbose                bool
+	OutputDir              string
 }
 
 // Result is returned from ProcessText services, not necessarily successful.
@@ -71,6 +72,11 @@ type Result struct {
 	Filename   string
 	StatusCode int
 	Body       []byte
+}
+
+// StringBody returns the response body as string.
+func (r *Result) StringBody() string {
+	return string(r.Body)
 }
 
 // String representation of a result.
@@ -132,13 +138,15 @@ func withoutExt(filepath string) string {
 	return strings.TrimSuffix(filepath, path.Ext(filepath))
 }
 
-func outputFilename(filepath string) string {
-	const ext = "grobid.tei.xml"
-	var (
-		dir = path.Dir(filepath)
-		fn  = withoutExt(filepath) + ext
-	)
-	return path.Join(dir, fn)
+// outputFilename returns a suitable output filename. If dir is empty, the
+// output is written in the same directory as the input file.
+func outputFilename(filepath, dir string) string {
+	const ext = ".grobid.tei.xml"
+	if dir == "" {
+		return withoutExt(filepath) + ext
+	} else {
+		return path.Join(dir, withoutExt(path.Base(filepath))+ext)
+	}
 }
 
 // ProcessDirRecursive takes a directory name, finds all files that look like
@@ -152,12 +160,22 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		wg      sync.WaitGroup
 		done    = make(chan bool)
 	)
+	if opts.OutputDir != "" {
+		if err := os.MkdirAll(opts.OutputDir, 0755); err != nil {
+			return err
+		}
+	}
 	// start N workers, TODO: cancellation
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for path := range pathC {
+				name := outputFilename(path, opts.OutputDir)
+				if _, err := os.Stat(name); err == nil && !opts.Force {
+					log.Printf("already processed: %v", name)
+					continue
+				}
 				result, err := g.ProcessPDF(path, service, opts)
 				if err != nil {
 					errC <- err
@@ -171,6 +189,10 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 	// adjacent file.
 	resultWorker := func() {
 		for result := range resultC {
+			name := outputFilename(result.Filename, opts.OutputDir)
+			if err := os.WriteFile(name, result.Body, 0644); err != nil {
+				log.Println(err)
+			}
 			log.Printf("got result [%d]: %v", result.StatusCode, result.Filename)
 		}
 		done <- true
@@ -244,7 +266,6 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 		return nil, err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	// req.Header.Set("Accept", "text/plain")
 	req.Header.Set("Accept", "application/xml")
 	resp, err := g.Client.Do(req)
 	if err != nil {
