@@ -7,6 +7,8 @@ Go client library and CLI for [grobid](https://github.com/kermitt2/grobid).
 $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
 ```
 
+![](static/670258.gif)
+
 ## Usage
 
 ```shell

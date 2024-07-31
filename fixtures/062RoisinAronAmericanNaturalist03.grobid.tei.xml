@@ -7,7 +7,7 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 		<fileDesc>
 			<titleStmt>
 				<title level="a" type="main">Split Sex Ratios in Perennial Social Hymenoptera: A Mixed Evolutionary Stable Strategy from the Queens&apos; Perspective?</title>
-				<funder ref="#_yMKJuBP">
+				<funder ref="#_aSutUdv">
 					<orgName type="full">Belgian National Fund for Scientific Research</orgName>
 				</funder>
 			</titleStmt>
@@ -59,7 +59,7 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 		</fileDesc>
 		<encodingDesc>
 			<appInfo>
-				<application version="0.8.0" ident="GROBID" when="2024-07-30T23:15+0000">
+				<application version="0.8.0" ident="GROBID" when="2024-07-31T13:27+0000">
 					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
 					<ref target="https://github.com/kermitt2/grobid"/>
 				</application>
@@ -102,7 +102,7 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 <div><head>Acknowledgments</head><p>We thank <rs type="person">J. M. Pasteels</rs> for discussions and useful comments on earlier drafts of this article. Financial support was provided by the <rs type="funder">Belgian National Fund for Scientific Research</rs> through personal (senior research associate positions to both authors) and grant (<rs type="grantNumber">FRFC 2.4569.02</rs>) support.</p></div>
 			</div>
 			<listOrg type="funding">
-				<org type="funding" xml:id="_yMKJuBP">
+				<org type="funding" xml:id="_aSutUdv">
 					<idno type="grant-number">FRFC 2.4569.02</idno>
 				</org>
 			</listOrg>
