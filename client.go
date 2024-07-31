@@ -232,6 +232,12 @@ func isPDF(filename string) bool {
 }
 
 func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string, opts *Options) (*Result, error) {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return &Result{
+			Filename: filename,
+			Err:      err,
+		}, err
+	}
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
