@@ -324,7 +324,12 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 			Citations            []string `json:"citations"`
 		}
 	)
-	if err := parseLines(filename, payload.Citations); err != nil {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	if err := parseLines(f, &payload.Citations); err != nil {
 		return nil, err
 	}
 	if opts.ConsolidateCitations {
@@ -359,13 +364,8 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 }
 
 // parseLines reads lines in a file into a given string slice.
-func parseLines(filename string, lines []string) error {
-	f, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	br := bufio.NewReader(f)
+func parseLines(r io.Reader, lines *[]string) error {
+	br := bufio.NewReader(r)
 	for {
 		line, err := br.ReadString('\n')
 		if err == io.EOF {
@@ -374,7 +374,11 @@ func parseLines(filename string, lines []string) error {
 		if err != nil {
 			return err
 		}
-		lines = append(lines, strings.TrimSpace(line))
+		v := strings.TrimSpace(line)
+		if len(v) == 0 {
+			continue
+		}
+		*lines = append(*lines, v)
 	}
 	return nil
 }
