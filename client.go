@@ -193,6 +193,8 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 	}
 	// TODO: actually do something with the result, e.g. write them to a
 	// adjacent file.
+	// TODO: we may want to store the result as SHA1.grobid.tei.xml, instead of
+	// "outputFilename"
 	resultWorker := func() {
 		for result := range resultC {
 			if result.Err != nil {
