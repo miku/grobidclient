@@ -167,7 +167,8 @@ func main() {
 		}
 	case *inputDir != "":
 		log.Printf("scanning %s", *inputDir)
-		err := grobid.ProcessDirRecursive(*inputDir, *serviceName, *numWorkers, opts)
+		err := grobid.ProcessDirRecursive(*inputDir, *serviceName,
+			*numWorkers, grobidclient.DebugResultWriter, opts)
 		if err != nil {
 			log.Fatal(err)
 		}

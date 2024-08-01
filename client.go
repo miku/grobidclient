@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -18,6 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 var Version = "0.1.0"
@@ -88,11 +90,12 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 
 // Result wraps a server response, not necessarily successful.
 type Result struct {
-	Filename   string
-	SHA1       string
-	StatusCode int
-	Body       []byte
-	Err        error
+	Filename       string
+	SHA1           string
+	StatusCode     int
+	Body           []byte
+	Err            error
+	ProcessingTime time.Duration
 }
 
 // StringBody returns the response body as string.
@@ -161,10 +164,81 @@ func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
 	return err == nil
 }
 
-// ProcessDirRecursive takes a directory name, finds all files that look like
+type resultFunc func(*Result, *Options) error
+
+func DebugResultWriter(result *Result, _ *Options) error {
+	if result.Err != nil {
+		log.Printf("[%d][%s] %s [%v][%v]",
+			result.StatusCode, result.SHA1, result.Filename, result.ProcessingTime, result.Err)
+	} else {
+		log.Printf("[%d][%s] %s [%v][]",
+			result.StatusCode, result.SHA1, result.Filename, result.ProcessingTime)
+	}
+	return nil
+}
+
+func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf resultFunc, opts *Options) error {
+	var (
+		pathC        = make(chan string)
+		errC         = make(chan error)
+		done         = make(chan bool)
+		wg           sync.WaitGroup
+		errList      []error
+		numProcessed int
+	)
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for path := range pathC {
+				if g.isAlreadyProcessed(path, opts) && !opts.Force {
+					log.Printf("already processed: %s", path)
+					continue
+				}
+				result, err := g.ProcessPDF(path, service, opts)
+				result.Err = err
+				errC <- rf(result, opts)
+			}
+		}()
+	}
+	go func() {
+		for err := range errC {
+			if err == nil {
+				continue
+			}
+			errList = append(errList, err)
+		}
+		done <- true
+	}()
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !isPDF(path) {
+			return nil
+		}
+		pathC <- path
+		numProcessed++
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	close(pathC)
+	wg.Wait()
+	close(errC)
+	<-done
+	if len(errList) > 0 {
+		return errors.Join(errList...)
+	}
+	log.Printf("processed %d docs", numProcessed)
+	return nil
+}
+
+// ProcessDirRecursive0 takes a directory name, finds all files that look like
 // PDF files and processes them. TODO: also process select text files, and
 // patents; also we should use context for cancellation here.
-func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *Options) error {
+func (g *Grobid) ProcessDirRecursive0(dir, service string, numWorkers int, opts *Options) error {
 	var (
 		pathC   = make(chan string)
 		resultC = make(chan *Result)
@@ -216,6 +290,7 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, opts *
 		if !isPDF(path) {
 			return nil
 		}
+		log.Printf("found: %s", path)
 		pathC <- path
 		return nil
 	})
@@ -236,10 +311,12 @@ func isPDF(filename string) bool {
 
 // ProcessPDFContext analysis a single PDF, with cancellation options.
 func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string, opts *Options) (*Result, error) {
+	started := time.Now()
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return &Result{
-			Filename: filename,
-			Err:      err,
+			Filename:       filename,
+			Err:            err,
+			ProcessingTime: time.Since(started),
 		}, err
 	}
 	if !IsValidService(service) {
@@ -306,10 +383,11 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 		return nil, err
 	}
 	result := &Result{
-		Filename:   filename,
-		SHA1:       fmt.Sprintf("%x", h.Sum(nil)),
-		StatusCode: resp.StatusCode,
-		Body:       b,
+		Filename:       filename,
+		SHA1:           fmt.Sprintf("%x", h.Sum(nil)),
+		StatusCode:     resp.StatusCode,
+		Body:           b,
+		ProcessingTime: time.Since(started),
 	}
 	return result, nil
 }
