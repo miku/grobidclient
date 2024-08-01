@@ -234,6 +234,7 @@ func isPDF(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
 }
 
+// ProcessPDFContext analysis a single PDF, with cancellation options.
 func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string, opts *Options) (*Result, error) {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return &Result{
@@ -255,25 +256,31 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 		errC   = make(chan error)
 	)
 	go func() {
+		defer close(errC)
 		f, err := os.Open(filename)
 		if err != nil {
 			errC <- err
+			return
 		}
 		defer f.Close()
 		opts.writeFields(mw)
 		part, err := mw.CreateFormFile("input", filepath.Base(filename))
 		if err != nil {
 			errC <- err
+			return
 		}
 		tee := io.TeeReader(f, h)
 		if _, err := io.Copy(part, tee); err != nil {
 			errC <- err
+			return
 		}
 		if err := mw.Close(); err != nil {
 			errC <- err
+			return
 		}
 		if err := pw.Close(); err != nil {
 			errC <- err
+			return
 		}
 		errC <- nil
 	}()
@@ -288,6 +295,9 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 		return nil, err
 	}
 	defer resp.Body.Close()
+	// This works, because the copy goroutine returns exactly one value. If
+	// there is an error in opening the file, we may not see this error. TODO:
+	// test case.
 	if err := <-errC; err != nil {
 		return nil, err
 	}
@@ -307,7 +317,7 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 // ProcessPDF processes a single PDF with given options. Result contains the
 // HTTP status code, indicating success or failure.
 func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, error) {
-	return g.ProcessPDFContext(context.TODO(), filename, service, opts)
+	return g.ProcessPDFContext(context.Background(), filename, service, opts)
 }
 
 // ProcessText processes a single text file with given options.
