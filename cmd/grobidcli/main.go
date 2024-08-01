@@ -21,7 +21,7 @@ var (
 	inputFile   = flag.String("f", "", "single input file to process")
 	inputDir    = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
 	outputDir   = flag.String("O", "", "output directory to write parsed files to")
-	configFile  = flag.String("c", "config.json", "path to config file")
+	configFile  = flag.String("c", "", "path to config file, often config.json")
 	numWorkers  = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
 	doPing      = flag.Bool("P", false, "do a ping")
 	// flags
@@ -125,6 +125,8 @@ func main() {
 		client.Backoff = pester.ExponentialBackoff
 		client.RetryOnHTTP429 = false
 	default:
+		// TODO: pester will retry on all 5XX errors, not just 503, like the
+		// python client
 		client.MaxRetries = *maxRetries
 		client.Backoff = pester.ExponentialBackoff
 		client.RetryOnHTTP429 = true
