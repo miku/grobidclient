@@ -40,8 +40,7 @@ func TestParseLines(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		var lines []string
-		err := parseLines(c.r, &lines)
+		lines, err := parseLines(c.r)
 		if err != c.err {
 			t.Fatalf("[%s] got %v, want %v", c.about, err, c.err)
 		}

@@ -343,9 +343,11 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 		return nil, err
 	}
 	defer f.Close()
-	if err := parseLines(f, &payload.Citations); err != nil {
+	lines, err := parseLines(f)
+	if err != nil {
 		return nil, err
 	}
+	payload.Citations = lines
 	if opts.ConsolidateCitations {
 		payload.ConsolidateCitations = "1"
 	}
@@ -378,7 +380,7 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 }
 
 // parseLines reads lines in a file into a given string slice.
-func parseLines(r io.Reader, lines *[]string) error {
+func parseLines(r io.Reader) (lines []string, err error) {
 	br := bufio.NewReader(r)
 	for {
 		line, err := br.ReadString('\n')
@@ -386,13 +388,13 @@ func parseLines(r io.Reader, lines *[]string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return lines, err
 		}
 		v := strings.TrimSpace(line)
 		if len(v) == 0 {
 			continue
 		}
-		*lines = append(*lines, v)
+		lines = append(lines, v)
 	}
-	return nil
+	return lines, nil
 }
