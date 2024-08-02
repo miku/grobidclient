@@ -25,6 +25,7 @@ var (
 	configFile        = flag.String("c", "", "path to config file, often config.json")
 	numWorkers        = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
 	doPing            = flag.Bool("P", false, "do a ping")
+	debug             = flag.Bool("debug", false, "use debug result writer")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
@@ -152,6 +153,7 @@ func main() {
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
 		OutputDir:              *outputDir,
+		UseHashAsFilename:      *useHashAsFilename,
 	}
 	if err := grobid.Ping(); err != nil {
 		log.Fatal(err)
@@ -170,8 +172,15 @@ func main() {
 		}
 	case *inputDir != "":
 		log.Printf("scanning %s", *inputDir)
+		var rwf grobidclient.ResultWriterFunc
+		switch {
+		case *debug:
+			rwf = grobidclient.DebugResultWriter
+		default:
+			rwf = grobidclient.DefaultResultWriter
+		}
 		err := grobid.ProcessDirRecursive(*inputDir, *serviceName,
-			*numWorkers, grobidclient.DebugResultWriter, opts)
+			*numWorkers, rwf, opts)
 		if err != nil {
 			log.Fatal(err)
 		}

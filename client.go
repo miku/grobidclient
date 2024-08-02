@@ -153,9 +153,9 @@ func withoutExt(filepath string) string {
 // output is written in the same directory as the input file.
 func outputFilename(filepath string, opts *Options) string {
 	if opts.OutputDir == "" {
-		return withoutExt(filepath) + DefaultExt
+		return withoutExt(filepath) + "." + DefaultExt
 	} else {
-		return path.Join(opts.OutputDir, withoutExt(path.Base(filepath))+DefaultExt)
+		return path.Join(opts.OutputDir, withoutExt(path.Base(filepath))+"."+DefaultExt)
 	}
 }
 
@@ -166,7 +166,7 @@ func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
 	return err == nil
 }
 
-type resultFunc func(*Result, *Options) error
+type ResultWriterFunc func(*Result, *Options) error
 
 func DebugResultWriter(result *Result, _ *Options) error {
 	if result.Err != nil {
@@ -188,6 +188,9 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 	if opts.UseHashAsFilename {
 		dst = path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1, DefaultExt))
 	}
+	if err := os.MkdirAll(path.Dir(dst), 0755); err != nil {
+		return err
+	}
 	if result.StatusCode != 200 || len(result.Body) == 0 {
 		// writing error file with suffixed error code
 		dst = strings.Replace(dst, "."+DefaultExt, fmt.Sprintf("_%d.txt", result.StatusCode), 1)
@@ -197,7 +200,7 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 	return os.WriteFile(dst, result.Body, 0644)
 }
 
-func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf resultFunc, opts *Options) error {
+func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf ResultWriterFunc, opts *Options) error {
 	var (
 		pathC        = make(chan string)
 		errC         = make(chan error)
@@ -211,6 +214,7 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf res
 		go func() {
 			defer wg.Done()
 			for path := range pathC {
+				log.Println(path, g.isAlreadyProcessed(path, opts))
 				if g.isAlreadyProcessed(path, opts) && !opts.Force {
 					log.Printf("already processed: %s", path)
 					continue
@@ -253,13 +257,23 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf res
 		if err != nil {
 			return err
 		}
-		// The Python client has hardcoded rules for what service and what filetype fit together.
-		if !isPDF(path) ||
-			!(service == "processCitationList" && isText(path)) ||
-			!(service == "processCitationPatentST36" && isXML(path)) {
+		if info.IsDir() {
 			return nil
 		}
-		pathC <- path
+		// The Python client has hardcoded rules for what service and what filetype fit together.
+		switch {
+		case service == "processFulltextDocument" && isPDF(path):
+			pathC <- path
+		case service == "processCitationList" && isText(path):
+			pathC <- path
+		case service == "processCitationPatentST36" && isXML(path):
+			pathC <- path
+		default:
+			if opts.Verbose {
+				log.Printf("skipping: %s", path)
+			}
+			return nil
+		}
 		numProcessed++
 		return nil
 	})
