@@ -173,13 +173,12 @@ func main() {
 			log.Fatal(err)
 		}
 		if result.StatusCode == 200 {
-			log.Printf("file: %s", result.Filename)
 			fmt.Println(result.StringBody())
 		} else {
 			log.Fatal(result)
 		}
 	case *inputDir != "":
-		log.Printf("scanning %s", *inputDir)
+		log.Printf("scanning %s...", *inputDir)
 		var rwf grobidclient.ResultWriterFunc
 		switch {
 		case *debug:
