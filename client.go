@@ -20,13 +20,21 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gabriel-vasile/mimetype"
 )
 
+// Version of grobidclient.
 var Version = "0.1.1"
 
+// ErrInvalidService, if the service name is not known.
+var ErrInvalidService = errors.New("invalid service")
+
+// DefaultExt for structured metadata outputs.
 const DefaultExt = "grobid.tei.xml"
 
-// ValidServices, see also: https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services
+// ValidServices, see also:
+// https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services
 var ValidServices = []string{
 	"processFulltextDocument",
 	"processHeaderDocument",
@@ -45,9 +53,6 @@ func IsValidService(name string) bool {
 	}
 	return false
 }
-
-// ErrInvalidService, if the service name is not known.
-var ErrInvalidService = errors.New("invalid service")
 
 // Doer is a minimal, local HTTP client abstraction.
 type Doer interface {
@@ -145,6 +150,7 @@ func (g *Grobid) Pingmoji() string {
 	return "⛔"
 }
 
+// withoutExt returns the given file or path without the extension.
 func withoutExt(filepath string) string {
 	return strings.TrimSuffix(filepath, path.Ext(filepath))
 }
@@ -205,6 +211,10 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 	return os.WriteFile(dst, result.Body, 0644)
 }
 
+// ProcessDirRecursive recursively walks a given directory and run parsing on
+// each file. A number of workers can be started and a ResultWriterFunc can be
+// specified, which gets called for each result, e.g. to write debug output to
+// stderr or to write a file with the structured metadata to disk.
 func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf ResultWriterFunc, opts *Options) error {
 	var (
 		pathC        = make(chan string)
@@ -240,7 +250,7 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 						// conditions.
 						Filename:   path,
 						StatusCode: -1,
-						Err:        fmt.Errorf("process pdf failed: %w", err),
+						Err:        fmt.Errorf("process failed: %w", err),
 					}
 				}
 				errC <- rf(result, opts)
@@ -304,15 +314,23 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 	return nil
 }
 
+// isPDF returns true, if the given file is likely a PDF.
 func isPDF(filename string) bool {
 	// TODO: could also do some content type snooping.
-	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
+	mtype, err := mimetype.DetectFile(filename)
+	if err != nil {
+		return strings.HasSuffix(strings.ToLower(filename), ".pdf")
+	} else {
+		return mtype.Is("application/pdf")
+	}
 }
 
+// isXML returns true, if the filename is likely an XML file.
 func isXML(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".xml")
 }
 
+// isText returns true, if the filename is likely an text file.
 func isText(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".txt")
 }

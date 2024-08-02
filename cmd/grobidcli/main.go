@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/miku/grobidclient"
 	"github.com/sethgrid/pester"
+	"github.com/slyrz/warc"
 )
 
 var (
@@ -26,6 +28,7 @@ var (
 	numWorkers        = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
 	doPing            = flag.Bool("P", false, "do a ping")
 	debug             = flag.Bool("debug", false, "use debug result writer")
+	warcFile          = flag.String("W", "", "path to WARC file to extract PDFs and parse them (experimental)")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
@@ -189,6 +192,84 @@ func main() {
 		err := grobid.ProcessDirRecursive(*inputDir, *serviceName,
 			*numWorkers, rwf, opts)
 		if err != nil {
+			log.Fatal(err)
+		}
+	case *warcFile != "":
+		// first run with vanilla docker image
+		//
+		// 2024/08/02 23:06:00 processed 1098 docs, with 0 errors
+		//
+		// real    14m50.127s
+		// user    0m21.236s
+		// sys     0m6.631s
+		//
+		// That's 1.25 PDF/s - probably vanilla grobid could be improved.
+		//
+		log.Println("scanning WARC...")
+		f, err := os.Open(*warcFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		reader, err := warc.NewReader(f)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Extract all HTTP 200 PDF files into this directory.
+		dir, err := os.MkdirTemp("", "grobidcli-warc-batch-*")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
+		for {
+			// experimental: WARC PDF to structured metadata
+			record, err := reader.ReadRecord()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+			if record.Header.Get("warc-type") != "response" {
+				continue
+			}
+			br := bufio.NewReader(record.Content)
+			resp, err := http.ReadResponse(br, nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer resp.Body.Close()
+			uri := record.Header.Get("warc-target-uri")
+			switch {
+			case resp.StatusCode == 200:
+				if err != nil {
+					log.Fatal(err)
+				}
+				f, err := os.CreateTemp(dir, "grobidcli-extracted-*")
+				if err != nil {
+					log.Fatal(err)
+				}
+				n, err := io.Copy(f, resp.Body)
+				if err != nil {
+					log.Printf("copy: %v (n=%d)", err, n)
+					continue
+				}
+				if err := f.Close(); err != nil {
+					log.Fatal(err)
+				}
+				log.Printf("%d %s %s", resp.StatusCode, uri, f.Name())
+			case resp.StatusCode >= 300 && resp.StatusCode < 400:
+				location, err := resp.Location()
+				if err != nil {
+					log.Println(err)
+				} else {
+					log.Printf("%d %s => %s", resp.StatusCode, uri, location)
+				}
+			}
+		}
+		if err := grobid.ProcessDirRecursive(dir, "processFulltextDocument", 24, grobidclient.DebugResultWriter, opts); err != nil {
 			log.Fatal(err)
 		}
 	default:
