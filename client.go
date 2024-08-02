@@ -195,7 +195,16 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf res
 					log.Printf("already processed: %s", path)
 					continue
 				}
-				result, err := g.ProcessPDF(path, service, opts)
+				var (
+					result *Result
+					err    error
+				)
+				switch {
+				case service == "processCitationList":
+					result, err = g.ProcessText(path, service, opts)
+				default:
+					result, err = g.ProcessPDF(path, service, opts)
+				}
 				if result == nil {
 					result = &Result{
 						// If processing failed, return a pseudo-result
@@ -224,7 +233,10 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf res
 		if err != nil {
 			return err
 		}
-		if !isPDF(path) {
+		// The Python client has hardcoded rules for what service and what filetype fit together.
+		if !isPDF(path) ||
+			!(service == "processCitationList" && isText(path)) ||
+			!(service == "processCitationPatentST36" && isXML(path)) {
 			return nil
 		}
 		pathC <- path
@@ -248,6 +260,14 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf res
 func isPDF(filename string) bool {
 	// TODO: could also do some content type snooping.
 	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
+}
+
+func isXML(filename string) bool {
+	return strings.HasSuffix(strings.ToLower(filename), ".xml")
+}
+
+func isText(filename string) bool {
+	return strings.HasSuffix(strings.ToLower(filename), ".txt")
 }
 
 // ProcessPDFContext analysis a single PDF, with cancellation options.
@@ -337,6 +357,7 @@ func (g *Grobid) ProcessPDF(filename, service string, opts *Options) (*Result, e
 
 // ProcessText processes a single text file with given options.
 func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, error) {
+	started := time.Now()
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
@@ -387,9 +408,10 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 		return nil, err
 	}
 	result := &Result{
-		Filename:   filename,
-		StatusCode: resp.StatusCode,
-		Body:       b,
+		Filename:       filename,
+		StatusCode:     resp.StatusCode,
+		Body:           b,
+		ProcessingTime: time.Since(started),
 	}
 	return result, nil
 }
