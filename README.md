@@ -29,6 +29,7 @@ valid service names:
   processCitationPatentST36
   processCitationPatentPDF
 
+  -H    use sha1 of file contents as the filename
   -O string
         output directory to write parsed files to
   -P    do a ping
@@ -37,7 +38,7 @@ valid service names:
   -T duration
         client timeout (default 1m0s)
   -c string
-        path to config file (default "config.json")
+        path to config file, often config.json
   -cc
         consolidate citations
   -ch
