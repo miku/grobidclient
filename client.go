@@ -214,7 +214,6 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 		go func() {
 			defer wg.Done()
 			for path := range pathC {
-				log.Println(path, g.isAlreadyProcessed(path, opts))
 				if g.isAlreadyProcessed(path, opts) && !opts.Force {
 					log.Printf("already processed: %s", path)
 					continue
