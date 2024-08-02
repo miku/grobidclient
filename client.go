@@ -24,6 +24,8 @@ import (
 
 var Version = "0.1.0"
 
+const DefaultExt = "grobid.tei.xml"
+
 // ValidServices, see also: https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services
 var ValidServices = []string{
 	"processFulltextDocument",
@@ -64,6 +66,7 @@ type Options struct {
 	Force                  bool
 	Verbose                bool
 	OutputDir              string
+	UseHashAsFilename      bool
 }
 
 // writeFields writes set flags to a writer.
@@ -148,18 +151,17 @@ func withoutExt(filepath string) string {
 
 // outputFilename returns a suitable output filename. If dir is empty, the
 // output is written in the same directory as the input file.
-func outputFilename(filepath, dir string) string {
-	const ext = ".grobid.tei.xml"
-	if dir == "" {
-		return withoutExt(filepath) + ext
+func outputFilename(filepath string, opts *Options) string {
+	if opts.OutputDir == "" {
+		return withoutExt(filepath) + DefaultExt
 	} else {
-		return path.Join(dir, withoutExt(path.Base(filepath))+ext)
+		return path.Join(opts.OutputDir, withoutExt(path.Base(filepath))+DefaultExt)
 	}
 }
 
 // isAlreadyProcessed returns true, if the file at a given path has been processed.
 func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
-	name := outputFilename(path, opts.OutputDir)
+	name := outputFilename(path, opts)
 	_, err := os.Stat(name)
 	return err == nil
 }
@@ -175,6 +177,24 @@ func DebugResultWriter(result *Result, _ *Options) error {
 			result.StatusCode, result.SHA1, result.Filename, result.ProcessingTime)
 	}
 	return result.Err
+}
+
+// DefaultResultWriter write out a single file with the result.
+func DefaultResultWriter(result *Result, opts *Options) error {
+	if result == nil {
+		return nil
+	}
+	dst := outputFilename(result.Filename, opts)
+	if opts.UseHashAsFilename {
+		dst = path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1, DefaultExt))
+	}
+	if result.StatusCode != 200 || len(result.Body) == 0 {
+		// writing error file with suffixed error code
+		dst = strings.Replace(dst, "."+DefaultExt, fmt.Sprintf("_%d.txt", result.StatusCode), 1)
+		return os.WriteFile(dst, result.Body, 0644)
+	}
+	// write TEI file
+	return os.WriteFile(dst, result.Body, 0644)
 }
 
 func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf resultFunc, opts *Options) error {

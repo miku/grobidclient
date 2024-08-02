@@ -16,14 +16,15 @@ import (
 )
 
 var (
-	server      = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
-	serviceName = flag.String("s", "processFulltextDocument", "a valid service name")
-	inputFile   = flag.String("f", "", "single input file to process")
-	inputDir    = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
-	outputDir   = flag.String("O", "", "output directory to write parsed files to")
-	configFile  = flag.String("c", "", "path to config file, often config.json")
-	numWorkers  = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
-	doPing      = flag.Bool("P", false, "do a ping")
+	server            = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
+	serviceName       = flag.String("s", "processFulltextDocument", "a valid service name")
+	inputFile         = flag.String("f", "", "single input file to process")
+	inputDir          = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
+	outputDir         = flag.String("O", "", "output directory to write parsed files to")
+	useHashAsFilename = flag.Bool("H", false, "use sha1 of file contents as the filename")
+	configFile        = flag.String("c", "", "path to config file, often config.json")
+	numWorkers        = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
+	doPing            = flag.Bool("P", false, "do a ping")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
