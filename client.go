@@ -159,7 +159,9 @@ func outputFilename(filepath string, opts *Options) string {
 	}
 }
 
-// isAlreadyProcessed returns true, if the file at a given path has been processed.
+// isAlreadyProcessed returns true, if the file at a given path has been
+// processed. Note: this does not work with hash based naming as for those the
+// file contents needs to be already hashed.
 func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
 	name := outputFilename(path, opts)
 	_, err := os.Stat(name)
@@ -195,6 +197,9 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 		// writing error file with suffixed error code
 		dst = strings.Replace(dst, "."+DefaultExt, fmt.Sprintf("_%d.txt", result.StatusCode), 1)
 		return os.WriteFile(dst, result.Body, 0644)
+	}
+	if opts.Verbose {
+		log.Printf("done: %s", dst)
 	}
 	// write TEI file
 	return os.WriteFile(dst, result.Body, 0644)
@@ -262,10 +267,19 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 		// The Python client has hardcoded rules for what service and what filetype fit together.
 		switch {
 		case service == "processFulltextDocument" && isPDF(path):
+			if opts.Verbose {
+				log.Printf("enqueued: %s", path)
+			}
 			pathC <- path
 		case service == "processCitationList" && isText(path):
+			if opts.Verbose {
+				log.Printf("enqueued: %s", path)
+			}
 			pathC <- path
 		case service == "processCitationPatentST36" && isXML(path):
+			if opts.Verbose {
+				log.Printf("enqueued: %s", path)
+			}
 			pathC <- path
 		default:
 			if opts.Verbose {

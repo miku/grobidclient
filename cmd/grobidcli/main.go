@@ -23,7 +23,7 @@ var (
 	outputDir         = flag.String("O", "", "output directory to write parsed files to")
 	useHashAsFilename = flag.Bool("H", false, "use sha1 of file contents as the filename")
 	configFile        = flag.String("c", "", "path to config file, often config.json")
-	numWorkers        = flag.Int("n", runtime.NumCPU()/2, "number of concurrent workers")
+	numWorkers        = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
 	doPing            = flag.Bool("P", false, "do a ping")
 	debug             = flag.Bool("debug", false, "use debug result writer")
 	// flags
@@ -40,6 +40,16 @@ var (
 	timeout                = flag.Duration("T", 60*time.Second, "client timeout")
 	showVersion            = flag.Bool("version", false, "show version")
 )
+
+func recommendedNumWorkers() int {
+	// keep the concurrency at the client (number of simultaneous calls)
+	// slightly higher than the available number of threads at the server side,
+	// for instance if the server has 16 threads, use a concurrency between 20
+	// and 24 (it's the option n in the above mentioned clients, in my case I
+	// used 24) -- https://github.com/kermitt2/grobid/issues/443#issuecomment-505208132
+	ncpu := runtime.NumCPU()
+	return int(float64(ncpu) * 1.5)
+}
 
 // Config is taken from the Python client implementation, which differs a bit.
 // We do not need sleep time (handled by exponential backoff), and batch size.

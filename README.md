@@ -9,6 +9,10 @@ $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
 
 ![](static/670258.gif)
 
+## Notes on server setup
+
+* [Production Grobid Server Configuration](https://github.com/kermitt2/grobid/issues/443#issuecomment-505208132)
+
 ## Usage
 
 ```shell
