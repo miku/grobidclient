@@ -138,8 +138,9 @@ func main() {
 		Client: client,
 	}
 	if *doPing {
-		fmt.Printf("grobid service at %s status: %s -- %s\n",
+		fmt.Printf(`{"server": %q, "status": %q, "t": %q}`,
 			*server, grobid.Pingmoji(), time.Now().Format(time.RFC1123))
+		fmt.Println()
 		os.Exit(0)
 	}
 	opts := &grobidclient.Options{
@@ -154,9 +155,6 @@ func main() {
 		Verbose:                *verbose,
 		OutputDir:              *outputDir,
 		UseHashAsFilename:      *useHashAsFilename,
-	}
-	if err := grobid.Ping(); err != nil {
-		log.Fatal(err)
 	}
 	switch {
 	case *inputFile != "":
@@ -185,6 +183,6 @@ func main() {
 			log.Fatal(err)
 		}
 	default:
-		log.Println("file (-f) or directory (-d) required")
+		log.Println("file (-f) or directory (-d) required, use (-P) for ping")
 	}
 }
