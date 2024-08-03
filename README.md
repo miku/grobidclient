@@ -101,3 +101,17 @@ $ grobidcli -d fixtures
 By default, for each PDF file a separate file is written to a file with the
 `grobid.tei.xml` extension.
 
+## TODO
+
+* [ ] allow to process WARC files
+* [ ] allow to group all output from one go into a single file (XML in JSON, really...)
+
+It would be nice to be able to point to a WARC file and parse all found PDFs in
+that WARC file.
+
+```shell
+$ grobidcli -W https://is.gd/Jpz7OH -o parsed.json
+```
+
+* [ ] try to cache processing; cache may be keyed on content hash
+
