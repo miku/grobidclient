@@ -1,7 +1,7 @@
 # grobidclient
 
 Go client library and CLI for [grobid](https://github.com/kermitt2/grobid).
-**This is not fully functional yet.** To install the CLI:
+**WARNING: limited functionality.** To install the CLI:
 
 ```
 $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
