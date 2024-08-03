@@ -112,7 +112,7 @@ func main() {
 	flag.Parse()
 	if *showVersion {
 		fmt.Println(grobidclient.Version)
-		os.Exit(1)
+		os.Exit(0)
 	}
 	if !grobidclient.IsValidService(*serviceName) {
 		log.Fatal("invalid service name")
@@ -268,6 +268,7 @@ func main() {
 		if err := grobid.ProcessDirRecursive(dir, "processFulltextDocument", 24, grobidclient.DebugResultWriter, opts); err != nil {
 			log.Fatal(err)
 		}
+		log.Println("todo: make parse results available in a sensible form")
 	default:
 		log.Println("file (-f) or directory (-d) required, use (-P) for ping")
 	}
