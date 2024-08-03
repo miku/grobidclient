@@ -17,14 +17,7 @@ $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
 
 ```shell
 $ grobidcli -h
-
-░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
-▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
-▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
-█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
-██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
-
-valid service names:
+grobidcli | valid service (-s) names:
 
   processFulltextDocument
   processHeaderDocument
@@ -36,11 +29,13 @@ valid service names:
   -H    use sha1 of file contents as the filename
   -O string
         output directory to write parsed files to
-  -P    do a ping
+  -P    do a ping, then exit
   -S string
         server URL (default "http://localhost:8070")
   -T duration
         client timeout (default 1m0s)
+  -W string
+        path to WARC file to extract PDFs and parse them (experimental)
   -c string
         path to config file, often config.json
   -cc
@@ -49,6 +44,8 @@ valid service names:
         consolidate header
   -d string
         input directory to scan for PDF, txt, or XML files
+  -debug
+        use debug result writer, does not create any files
   -f string
         single input file to process
   -force
@@ -60,7 +57,7 @@ valid service names:
   -irc
         include raw citations
   -n int
-        number of concurrent workers (default 4)
+        number of concurrent workers (default 12)
   -r int
         max retries (default 10)
   -s string
