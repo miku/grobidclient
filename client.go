@@ -54,11 +54,6 @@ func IsValidService(name string) bool {
 	return false
 }
 
-// Doer is a minimal, local HTTP client abstraction.
-type Doer interface {
-	Do(*http.Request) (*http.Response, error)
-}
-
 // Options are grobid API options.
 type Options struct {
 	GenerateIDs            bool
@@ -114,6 +109,11 @@ func (r *Result) StringBody() string {
 // String representation of a result.
 func (r *Result) String() string {
 	return fmt.Sprintf("%d on %s, body: %s", r.StatusCode, r.Filename, string(r.Body))
+}
+
+// Doer is a minimal, local HTTP client abstraction.
+type Doer interface {
+	Do(*http.Request) (*http.Response, error)
 }
 
 // Grobid client, embedding an HTTP client for flexibility.

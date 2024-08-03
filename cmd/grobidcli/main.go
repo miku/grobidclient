@@ -26,10 +26,14 @@ var (
 	createHashSymlinks = flag.Bool("H", false, "use sha1 of file contents as the filename")
 	configFile         = flag.String("c", "", "path to config file, often config.json")
 	numWorkers         = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
-	doPing             = flag.Bool("P", false, "do a ping")
-	debug              = flag.Bool("debug", false, "use debug result writer")
+	doPing             = flag.Bool("P", false, "do a ping, then exit")
+	debug              = flag.Bool("debug", false, "use debug result writer, does not create any files")
 	warcFile           = flag.String("W", "", "path to WARC file to extract PDFs and parse them (experimental)")
-	// flags
+	verbose            = flag.Bool("v", false, "be verbose")
+	maxRetries         = flag.Int("r", 10, "max retries")
+	timeout            = flag.Duration("T", 60*time.Second, "client timeout")
+	showVersion        = flag.Bool("version", false, "show version")
+	// Flags passed to grobid API.
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
 	consolidateHeader      = flag.Bool("ch", false, "consolidate header")
@@ -38,10 +42,6 @@ var (
 	forceReprocess         = flag.Bool("force", false, "force reprocess")
 	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
-	verbose                = flag.Bool("v", false, "be verbose")
-	maxRetries             = flag.Int("r", 10, "max retries")
-	timeout                = flag.Duration("T", 60*time.Second, "client timeout")
-	showVersion            = flag.Bool("version", false, "show version")
 )
 
 func recommendedNumWorkers() int {
@@ -67,6 +67,7 @@ type Config struct {
 	Timeout      int64    `json:"timeout"`
 }
 
+// Timeout returns the timeout as a time.Duration.
 func (c *Config) TimeoutDuration() time.Duration {
 	dur, err := time.ParseDuration(fmt.Sprintf("%ds", c.Timeout))
 	if err != nil {
@@ -75,6 +76,7 @@ func (c *Config) TimeoutDuration() time.Duration {
 	return dur
 }
 
+// FromFile reads config from a given filename.
 func (c *Config) FromFile(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -88,12 +90,14 @@ func (c *Config) FromFile(filename string) error {
 	return json.Unmarshal(b, c)
 }
 
+// DefaultConfig is taken from the example in the Python client. Some fields
+// are not used in this client.
 var DefaultConfig = &Config{
-	BatchSize:    100, // unused
 	Coordinates:  []string{"persName", "figure", "ref", "biblStruct", "formula", "s", "note", "title"},
 	Timeout:      60,
-	SleepTime:    5, // unused
 	GrobidServer: *server,
+	BatchSize:    100, // unused, we use worker threads
+	SleepTime:    5,   // unused, covered by retry and backoff
 }
 
 func main() {
@@ -188,7 +192,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case *warcFile != "":
-		// first run with vanilla docker image
+		// WIP: first run with vanilla docker image
 		//
 		// 2024/08/02 23:06:00 processed 1098 docs, with 0 errors
 		//
@@ -197,7 +201,6 @@ func main() {
 		// sys     0m6.631s
 		//
 		// That's 1.25 PDF/s - probably vanilla grobid could be improved.
-		//
 		log.Println("scanning WARC...")
 		f, err := os.Open(*warcFile)
 		if err != nil {
