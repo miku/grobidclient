@@ -71,7 +71,7 @@ type Options struct {
 	Force                  bool
 	Verbose                bool
 	OutputDir              string
-	UseHashAsFilename      bool
+	CreateHashSymlinks     bool
 }
 
 // writeFields writes set flags to a writer.
@@ -193,9 +193,6 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 		return nil
 	}
 	dst := outputFilename(result.Filename, opts)
-	if opts.UseHashAsFilename {
-		dst = path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1, DefaultExt))
-	}
 	if err := os.MkdirAll(path.Dir(dst), 0755); err != nil {
 		return err
 	}
@@ -208,7 +205,17 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 		log.Printf("done: %s", dst)
 	}
 	// write TEI file
-	return os.WriteFile(dst, result.Body, 0644)
+	err := os.WriteFile(dst, result.Body, 0644)
+	if err != nil {
+		return err
+	}
+	if opts.CreateHashSymlinks {
+		link := path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1, DefaultExt))
+		if err := os.Symlink(path.Base(dst), link); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ProcessDirRecursive recursively walks a given directory and run parsing on

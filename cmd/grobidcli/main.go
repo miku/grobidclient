@@ -18,17 +18,17 @@ import (
 )
 
 var (
-	server            = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
-	serviceName       = flag.String("s", "processFulltextDocument", "a valid service name")
-	inputFile         = flag.String("f", "", "single input file to process")
-	inputDir          = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
-	outputDir         = flag.String("O", "", "output directory to write parsed files to")
-	useHashAsFilename = flag.Bool("H", false, "use sha1 of file contents as the filename")
-	configFile        = flag.String("c", "", "path to config file, often config.json")
-	numWorkers        = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
-	doPing            = flag.Bool("P", false, "do a ping")
-	debug             = flag.Bool("debug", false, "use debug result writer")
-	warcFile          = flag.String("W", "", "path to WARC file to extract PDFs and parse them (experimental)")
+	server             = flag.String("S", "http://localhost:8070", "server URL") // TODO: make this repeatable
+	serviceName        = flag.String("s", "processFulltextDocument", "a valid service name")
+	inputFile          = flag.String("f", "", "single input file to process")
+	inputDir           = flag.String("d", "", "input directory to scan for PDF, txt, or XML files")
+	outputDir          = flag.String("O", "", "output directory to write parsed files to")
+	createHashSymlinks = flag.Bool("H", false, "use sha1 of file contents as the filename")
+	configFile         = flag.String("c", "", "path to config file, often config.json")
+	numWorkers         = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
+	doPing             = flag.Bool("P", false, "do a ping")
+	debug              = flag.Bool("debug", false, "use debug result writer")
+	warcFile           = flag.String("W", "", "path to WARC file to extract PDFs and parse them (experimental)")
 	// flags
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
@@ -98,14 +98,7 @@ var DefaultConfig = &Config{
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, `
-░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
-▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
-▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
-█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
-██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
-                                                                                `)
-		fmt.Fprintln(os.Stderr, "valid service names:\n")
+		fmt.Fprintln(os.Stderr, "grobidcli | valid service (-s) names:\n")
 		for _, s := range grobidclient.ValidServices {
 			fmt.Fprintf(os.Stderr, "  %s\n", s)
 		}
@@ -167,7 +160,7 @@ func main() {
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
 		OutputDir:              *outputDir,
-		UseHashAsFilename:      *useHashAsFilename,
+		CreateHashSymlinks:     *createHashSymlinks,
 	}
 	switch {
 	case *inputFile != "":
