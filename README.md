@@ -98,4 +98,6 @@ $ grobidcli -d fixtures
 2024/07/30 20:48:39 got result [200]: fixtures/062RoisinAronAmericanNaturalist03.pdf
 ```
 
-Results are not written to a ".grobid.tei.xml" file yet.
+By default, for each PDF file a separate file is written to a file with the
+`grobid.tei.xml` extension.
+
