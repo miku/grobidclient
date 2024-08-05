@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/sethgrid/pester"
 )
 
 // Version of grobidclient.
@@ -128,6 +129,21 @@ func (r *Result) String() string {
 // Doer is a minimal, local HTTP client abstraction.
 type Doer interface {
 	Do(*http.Request) (*http.Response, error)
+}
+
+// New creates a new Grobid client with a resilient HTTP client.
+func New(server Server) *Grobid {
+	hc := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	client := pester.NewExtendedClient(hc)
+	client.MaxRetries = 3
+	client.Backoff = pester.ExponentialBackoff
+	client.RetryOnHTTP429 = true
+	return &Grobid{
+		Server: server,
+		Client: client,
+	}
 }
 
 // Grobid client, embedding an HTTP client for flexibility.
