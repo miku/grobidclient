@@ -54,8 +54,53 @@ func ParseDocument(r io.Reader) error {
 func parseAffiliation(elem *etree.Element) *GrobidAffiliation { return nil }
 func parseAuthor(elem *etree.Element) *GrobidAuthor           { return nil }
 func parseEditor(elem *etree.Element) *GrobidAuthor           { return nil }
-func parsePersName(elem *etree.Element) *GrobidAuthor         { return nil }
-func parseBiblio(elem *etree.Element) *GrobidBiblio           { return nil }
+
+func parsePersName(elem *etree.Element) *GrobidAuthor {
+	if elem == nil {
+		return nil
+	}
+	name := strings.Join(iterTextTrimSpace(elem, " "))
+	ga := &GrobidAuthor{
+		FullName:   name,
+		GivenName:  findElementText(`./forename[@type=first]`),
+		MiddleName: findElementText(`./forename[@type=middle]`),
+		Surname:    findElementText(`./surname`),
+	}
+	return ga
+}
+
+func parseBiblio(elem *etree.Element) *GrobidBiblio { return nil }
+
+func findElementText(elem *etree.Element, path string) string {
+	e := elem.FindElement(path)
+	if e == nil {
+		return ""
+	}
+	return e.Text()
+}
+
+// iterText returns all text elements recursively, in document order.
+func iterText(elem *etree.Element) (result []string) {
+	result = append(result, elem.Text())
+	for _, ch := range elem.ChildElements() {
+		result = append(result, iterText(ch)...)
+	}
+	result = append(result, elem.Tail())
+	return result
+}
+
+// iterTextTrimSpace returns all child text elements, recursively, in document
+// order, with all whitespace stripped.
+func iterTextTrimSpace(elem *etree.Element) (result []string) {
+	for _, v := range iterText(elem) {
+		c := strings.TrimSpace(v)
+		if len(c) == 0 {
+			continue
+		}
+		result = append(result, c)
+	}
+	return result
+}
 
 type GrobidDocument struct {
 	GrobidVersion   string
