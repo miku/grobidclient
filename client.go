@@ -54,6 +54,20 @@ func IsValidService(name string) bool {
 	return false
 }
 
+var DefaultOptions = &Options{
+	GenerateIDs:            true,
+	ConsolidateHeader:      true,
+	ConsolidateCitations:   true,
+	IncludeRawCitations:    true,
+	IncluseRawAffiliations: true,
+	TEICoordinates:         true,
+	SegmentSentences:       true,
+	Force:                  false,
+	Verbose:                false,
+	OutputDir:              "",
+	CreateHashSymlinks:     false,
+}
+
 // Options are grobid API options.
 type Options struct {
 	GenerateIDs            bool
@@ -189,6 +203,9 @@ func DebugResultWriter(result *Result, _ *Options) error {
 
 // DefaultResultWriter write out a single file with the result.
 func DefaultResultWriter(result *Result, opts *Options) error {
+	if opts == nil {
+		opts = DefaultOptions
+	}
 	if result == nil {
 		return nil
 	}
@@ -231,6 +248,9 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 		errList      []error
 		numProcessed int
 	)
+	if opts == nil {
+		opts = DefaultOptions
+	}
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
@@ -348,6 +368,9 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return nil, err
 	}
+	if opts == nil {
+		opts = DefaultOptions
+	}
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
 	}
@@ -432,6 +455,9 @@ func (g *Grobid) ProcessText(filename, service string, opts *Options) (*Result, 
 	started := time.Now()
 	if !IsValidService(service) {
 		return nil, ErrInvalidService
+	}
+	if opts == nil {
+		opts = DefaultOptions
 	}
 	serviceURL, err := url.JoinPath(g.Server, "api", service)
 	if err != nil {
