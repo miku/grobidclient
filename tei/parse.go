@@ -77,6 +77,9 @@ func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
 	return ga
 }
 
+// parseAuthor is an internal helper to parse a single TEI author XML tag into
+// a GrobidAuthor struct. An author could appear in the document headers or
+// citations.
 func parseAuthor(elem *etree.Element) *GrobidAuthor {
 	persNameTag := elem.FindElement(fmt.Sprintf("./persName[namespace-uri=%q]", NS))
 	if persNameTag == nil {
@@ -88,15 +91,42 @@ func parseAuthor(elem *etree.Element) *GrobidAuthor {
 	}
 	ga.ORCID = findElementText(`./idno[@type="ORCID"]`) // TODO: NS
 	ga.Email = findElementText(`./email`)               // TODO: NS
-	affiliationTag := elem.FindElement(`./affiliation[namespace-uri=%q]`)
+	affiliationTag := elem.FindElement(fmt.Sprintf(`./affiliation[namespace-uri=%q]`, NS))
 	if affiliationTag != nil {
 		ga.Affiliation = parseAffiliation(affiliationTag)
 	}
 	return ga
 }
 
-func parseEditor(elem *etree.Element) *GrobidAuthor { return nil }
+// parseEditor may contain multiple authors. Sometimes there is no persName,
+// only a bare string under the <editor> tag. This helper should handle these
+// cases.
+func parseEditor(elem *etree.Element) []*GrobidAuthor {
+	persNameTags := elem.FindElements(fmt.Sprintf("./persName[namespace-uri=%q]", NS))
+	if len(persNameTags) == 0 {
+		if elem.FindElement("*") == nil {
+			rawName := elem.Text()
+			trimmed := strings.TrimSpace(rawName)
+			if len(rawName) > 0 && len(trimmed) > 2 {
+				return []*GrobidAuthor{
+					&GrobidAuthor{FullName: trimmed},
+				}
+			}
+		}
+		return nil
+	}
+	var persons []*GrobidAuthor
+	for _, tag := range persNameTags {
+		ga := parsePersName(tag)
+		if ga == nil {
+			continue
+		}
+		persons = append(persons, ga)
+	}
+	return persons
+}
 
+// parsePersName works on a single persName tag and returns a GrobidAuthor struct.
 func parsePersName(elem *etree.Element) *GrobidAuthor {
 	if elem == nil {
 		return nil
