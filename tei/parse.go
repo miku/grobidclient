@@ -77,7 +77,24 @@ func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
 	return ga
 }
 
-func parseAuthor(elem *etree.Element) *GrobidAuthor { return nil }
+func parseAuthor(elem *etree.Element) *GrobidAuthor {
+	persNameTag := elem.FindElement(fmt.Sprintf("./persName[namespace-uri=%q]", NS))
+	if persNameTag == nil {
+		return nil
+	}
+	ga := parsePersName(elem)
+	if ga == nil {
+		return nil
+	}
+	ga.ORCID = findElementText(`./idno[@type="ORCID"]`) // TODO: NS
+	ga.Email = findElementText(`./email`)               // TODO: NS
+	affiliationTag := elem.FindElement(`./affiliation[namespace-uri=%q]`)
+	if affiliationTag != nil {
+		ga.Affiliation = parseAffiliation(affiliationTag)
+	}
+	return ga
+}
+
 func parseEditor(elem *etree.Element) *GrobidAuthor { return nil }
 
 func parsePersName(elem *etree.Element) *GrobidAuthor {
