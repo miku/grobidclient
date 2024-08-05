@@ -21,6 +21,7 @@ var ErrInvalidDocument = errors.New("invalid document")
 func ParseCitationList() {}
 func ParseCitation()     {}
 func ParseCitations()    {}
+
 func ParseDocument(r io.Reader) error {
 	tree := etree.NewDocument()
 	_, err := tree.ReadFrom(r)
@@ -141,7 +142,20 @@ func parsePersName(elem *etree.Element) *GrobidAuthor {
 	return ga
 }
 
-func parseBiblio(elem *etree.Element) *GrobidBiblio { return nil }
+func parseBiblio(elem *etree.Element) *GrobidBiblio {
+	var authors []*GrobidAuthor
+	for _, ela := range elem.FindElements(fmt.Sprintf(`./author[namespace-uri=%q]`, NS)) {
+		a := parseAuthor(ela)
+		if a == nil {
+			continue
+		}
+		authors = append(authors, a)
+	}
+	// TODO: editors
+
+	return nil
+
+}
 
 type GrobidDocument struct {
 	GrobidVersion   string
@@ -241,6 +255,23 @@ func (g *GrobidBiblio) IsEmpty() bool {
 		g.ArxivID,
 		g.URL,
 	)
+}
+
+func cleanURL(u string) string {
+	if len(u) == 0 {
+		return u
+	}
+	u = strings.TrimSpace(u)
+	if strings.HasSuffix(u, ".Lastaccessed") {
+		u = strings.Replace(u, ".Lastaccessed", "", 1)
+	}
+	if strings.HasPrefix(u, "<") {
+		u = u[1:]
+	}
+	if strings.Contains(u, ">") {
+		u = strings.Split(u, ">")[0]
+	}
+	return u
 }
 
 // anyString returns true, if any of the given strings is not empty.
