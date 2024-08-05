@@ -51,6 +51,12 @@ func ParseDocument(r io.Reader) error {
 	return nil
 }
 
+func parseAffiliation(elem *etree.Element) *GrobidAffiliation { return nil }
+func parseAuthor(elem *etree.Element) *GrobidAuthor           { return nil }
+func parseEditor(elem *etree.Element) *GrobidAuthor           { return nil }
+func parsePersName(elem *etree.Element) *GrobidAuthor         { return nil }
+func parseBiblio(elem *etree.Element) *GrobidBiblio           { return nil }
+
 type GrobidDocument struct {
 	GrobidVersion   string
 	GrobidTs        string
