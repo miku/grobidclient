@@ -131,7 +131,7 @@ type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-// New creates a new Grobid client with a resilient HTTP client.
+// New creates a new Grobid client with a recommended, resilient HTTP client.
 func New(server string) *Grobid {
 	hc := &http.Client{
 		Timeout: 30 * time.Second,
