@@ -152,6 +152,42 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 		authors = append(authors, a)
 	}
 	// TODO: editors
+	var editors []*GrobidAuthor
+	var editorTags = elem.FindElements(fmt.Sprintf(`.//editor[namespace-uri=%q]`, NS))
+	for _, et := range editorTags {
+		editors = append(editors, parseEditor(et)...)
+	}
+	var contribEditorTags = elem.FindElements(`.//contributor[@role="editor"]`) // TODO: NS
+	for _, cet := range contribEditorTags {
+		editors = append(editors, parseEditor(cet)...)
+	}
+	biblio := GrobidBiblio{
+		Authors:      authors,
+		Editors:      editors,
+		ID:           elem.SelectAttrValue(`{http://www.w3.org/XML/1998/namespace}id`, ""), // TODO: check NS
+		Unstructured: findElementText(elem, `.//note[@type="raw_reference"]`),              // TODO: NS
+		// date below
+		// titles: @level=a for article, @level=m for manuscrupt (book)
+		Title:         findElementText(`.//title[@type="main"]`),
+		Journal:       findElementText(`.//title[@level="j"]`),
+		JournalAbbrev: findElementText(`.//title[@level="j"][@type="abbrev"]`),
+		SeriesTitle:   findElementText(`.//title[@level="s"]`),
+		Publisher:     findElementText(`.//publicationStmt/publisher`),
+		Institution:   findElementText(`.//respStmt/orgName`),
+		Volume:        findElementText(`.//biblScope[@unit="volume"]`),
+		Issue:         findElementText(`.//biblScope[@unit="issue"]`),
+		// pages below
+		DOI:     findElementText(`.//idno[@type="DOI"]`),
+		PMID:    findElementText(`.//idno[@type="PMID"]`),
+		PMCID:   findElementText(`.//idno[@type="PMCID"]`),
+		ArxivID: findElementText(`.//idno[@type="arXiv"]`),
+		PII:     findElementText(`.//idno[@type="PII"]`),
+		Ark:     findElementText(`.//idno[@type="ark"]`),
+		IsTexID: findElementText(`.//idno[@type="istexId"]`),
+		ISSN:    findElementText(`.//idno[@type="ISSN"]`),
+		EISSN:   findElementText(`.//idno[@type="eISSN"]`),
+	}
+	// TODO: bookTitleTag
 
 	return nil
 
