@@ -31,7 +31,7 @@ func TestIterTextTrimSpace(t *testing.T) {
 // panic, if the XML is not parseable.
 func elementFromString(xmlText string) *etree.Element {
 	doc := etree.NewDocument()
-	if err := doc.ReadString(xmlText); err != nil {
+	if err := doc.ReadFromString(xmlText); err != nil {
 		panic(err)
 	}
 	return doc.Root()

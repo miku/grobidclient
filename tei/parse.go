@@ -62,28 +62,28 @@ func ParseCitations(xmlText string) []*GrobidBiblio {
 	return ParseCitationList(xmlText)
 }
 
-func ParseDocument(r io.Reader) error {
+func ParseDocument(r io.Reader) (*GrobidDocument, error) {
 	tree := etree.NewDocument()
 	_, err := tree.ReadFrom(r)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	tei := tree.Root()
 	header := tei.FindElement(fmt.Sprintf(".//teiHeader[namespace-uri()=%q]", NS))
 	if header == nil {
-		return ErrInvalidDocument
+		return nil, ErrInvalidDocument
 	}
 	applicationTags := header.FindElements(
 		fmt.Sprintf(".//appInfo[namespace-uri()=%q]/application[namespace-uri()=%q]", NS, NS))
 	if len(applicationTags) == 0 {
-		return ErrInvalidDocument
+		return nil, ErrInvalidDocument
 	}
 	var (
 		applicationTag = applicationTags[0]
 		version        = strings.TrimSpace(applicationTag.SelectAttr("version").Value)
 		ts             = strings.TrimSpace(applicationTag.SelectAttr("when").Value)
 	)
-	doc := GrobidDocument{
+	doc := &GrobidDocument{
 		GrobidVersion: version,
 		GrobidTs:      ts,
 		Header:        parseBiblio(header),
@@ -116,7 +116,7 @@ func ParseDocument(r io.Reader) error {
 	if el = tei.FindElement(`.//back/div[@type="annex"]`); el != nil {
 		doc.Annex = strings.Join(iterTextTrimSpace(el), " ")
 	}
-	return doc
+	return doc, nil
 }
 
 func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
@@ -157,8 +157,8 @@ func parseAuthor(elem *etree.Element) *GrobidAuthor {
 	if ga == nil {
 		return nil
 	}
-	ga.ORCID = findElementText(`./idno[@type="ORCID"]`) // TODO: NS
-	ga.Email = findElementText(`./email`)               // TODO: NS
+	ga.ORCID = findElementText(elem, `./idno[@type="ORCID"]`) // TODO: NS
+	ga.Email = findElementText(elem, `./email`)               // TODO: NS
 	affiliationTag := elem.FindElement(fmt.Sprintf(`./affiliation[namespace-uri=%q]`, NS))
 	if affiliationTag != nil {
 		ga.Affiliation = parseAffiliation(affiliationTag)
@@ -199,12 +199,12 @@ func parsePersName(elem *etree.Element) *GrobidAuthor {
 	if elem == nil {
 		return nil
 	}
-	name := strings.Join(iterTextTrimSpace(elem, " "))
+	name := strings.Join(iterTextTrimSpace(elem), " ")
 	ga := &GrobidAuthor{
 		FullName:   name,
-		GivenName:  findElementText(`./forename[@type="first"]`),
-		MiddleName: findElementText(`./forename[@type="middle"]`),
-		Surname:    findElementText(`./surname`),
+		GivenName:  findElementText(elem, `./forename[@type="first"]`),
+		MiddleName: findElementText(elem, `./forename[@type="middle"]`),
+		Surname:    findElementText(elem, `./surname`),
 	}
 	return ga
 }
@@ -228,31 +228,31 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 	for _, cet := range contribEditorTags {
 		editors = append(editors, parseEditor(cet)...)
 	}
-	biblio := GrobidBiblio{
+	biblio := &GrobidBiblio{
 		Authors:      authors,
 		Editors:      editors,
 		ID:           elem.SelectAttrValue(`{http://www.w3.org/XML/1998/namespace}id`, ""), // TODO: check NS
 		Unstructured: findElementText(elem, `.//note[@type="raw_reference"]`),              // TODO: NS
 		// date below
 		// titles: @level=a for article, @level=m for manuscrupt (book)
-		Title:         findElementText(`.//title[@type="main"]`),
-		Journal:       findElementText(`.//title[@level="j"]`),
-		JournalAbbrev: findElementText(`.//title[@level="j"][@type="abbrev"]`),
-		SeriesTitle:   findElementText(`.//title[@level="s"]`),
-		Publisher:     findElementText(`.//publicationStmt/publisher`),
-		Institution:   findElementText(`.//respStmt/orgName`),
-		Volume:        findElementText(`.//biblScope[@unit="volume"]`),
-		Issue:         findElementText(`.//biblScope[@unit="issue"]`),
+		Title:         findElementText(elem, `.//title[@type="main"]`),
+		Journal:       findElementText(elem, `.//title[@level="j"]`),
+		JournalAbbrev: findElementText(elem, `.//title[@level="j"][@type="abbrev"]`),
+		SeriesTitle:   findElementText(elem, `.//title[@level="s"]`),
+		Publisher:     findElementText(elem, `.//publicationStmt/publisher`),
+		Institution:   findElementText(elem, `.//respStmt/orgName`),
+		Volume:        findElementText(elem, `.//biblScope[@unit="volume"]`),
+		Issue:         findElementText(elem, `.//biblScope[@unit="issue"]`),
 		// pages below
-		DOI:     findElementText(`.//idno[@type="DOI"]`),
-		PMID:    findElementText(`.//idno[@type="PMID"]`),
-		PMCID:   findElementText(`.//idno[@type="PMCID"]`),
-		ArxivID: findElementText(`.//idno[@type="arXiv"]`),
-		PII:     findElementText(`.//idno[@type="PII"]`),
-		Ark:     findElementText(`.//idno[@type="ark"]`),
-		IsTexID: findElementText(`.//idno[@type="istexId"]`),
-		ISSN:    findElementText(`.//idno[@type="ISSN"]`),
-		EISSN:   findElementText(`.//idno[@type="eISSN"]`),
+		DOI:     findElementText(elem, `.//idno[@type="DOI"]`),
+		PMID:    findElementText(elem, `.//idno[@type="PMID"]`),
+		PMCID:   findElementText(elem, `.//idno[@type="PMCID"]`),
+		ArxivID: findElementText(elem, `.//idno[@type="arXiv"]`),
+		PII:     findElementText(elem, `.//idno[@type="PII"]`),
+		Ark:     findElementText(elem, `.//idno[@type="ark"]`),
+		IsTexID: findElementText(elem, `.//idno[@type="istexId"]`),
+		ISSN:    findElementText(elem, `.//idno[@type="ISSN"]`),
+		EISSN:   findElementText(elem, `.//idno[@type="eISSN"]`),
 	}
 	bookTitleTag := elem.FindElement(`.//title[@level="m"]`) // TODO: NS
 	if bookTitleTag != nil && bookTitleTag.SelectAttrValue("type", "") == "" {
@@ -348,7 +348,7 @@ type GrobidAuthor struct {
 	Surname     string
 	Email       string
 	ORCID       string
-	Affiliation GrobidAffiliation
+	Affiliation *GrobidAffiliation
 }
 
 type GrobidBiblio struct {
@@ -360,7 +360,7 @@ type GrobidBiblio struct {
 	Title         string
 	BookTitle     string
 	SeriesTitle   string
-	Editor        []*GrobidAuthor
+	Editors       []*GrobidAuthor
 	Journal       string
 	JournalAbbrev string
 	Publisher     string
@@ -384,7 +384,7 @@ type GrobidBiblio struct {
 }
 
 func (g *GrobidBiblio) IsEmpty() bool {
-	if len(g.Authors) > 0 || len(g.Editor) > 0 {
+	if len(g.Authors) > 0 || len(g.Editors) > 0 {
 		return false
 	}
 	return !anyString(
@@ -441,6 +441,9 @@ func findElementText(elem *etree.Element, path string) string {
 
 // iterText returns all text elements recursively, in document order.
 func iterText(elem *etree.Element) (result []string) {
+	if elem == nil {
+		return
+	}
 	result = append(result, elem.Text())
 	for _, ch := range elem.ChildElements() {
 		result = append(result, iterText(ch)...)
@@ -452,6 +455,9 @@ func iterText(elem *etree.Element) (result []string) {
 // iterTextTrimSpace returns all child text elements, recursively, in document
 // order, with all whitespace stripped.
 func iterTextTrimSpace(elem *etree.Element) (result []string) {
+	if elem == nil {
+		return
+	}
 	for _, v := range iterText(elem) {
 		c := strings.TrimSpace(v)
 		if len(c) == 0 {

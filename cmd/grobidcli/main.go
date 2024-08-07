@@ -102,7 +102,8 @@ var DefaultConfig = &Config{
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, "grobidcli | valid service (-s) names:\n")
+		fmt.Fprintln(os.Stderr, "grobidcli | valid service (-s) names:")
+		fmt.Fprintln(os.Stderr)
 		for _, s := range grobidclient.ValidServices {
 			fmt.Fprintf(os.Stderr, "  %s\n", s)
 		}
