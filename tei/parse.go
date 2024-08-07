@@ -432,6 +432,9 @@ func anyString(vs ...string) bool {
 
 // findElementText return the text of a node matched by path or the empty string.
 func findElementText(elem *etree.Element, path string) string {
+	if elem == nil {
+		return ""
+	}
 	e := elem.FindElement(path)
 	if e == nil {
 		return ""

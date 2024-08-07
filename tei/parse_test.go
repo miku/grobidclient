@@ -7,6 +7,68 @@ import (
 	"github.com/beevik/etree"
 )
 
+func TestAnyString(t *testing.T) {
+	var cases = []struct {
+		about  string
+		vs     []string
+		result bool
+	}{
+		{
+			about:  "nil",
+			vs:     nil,
+			result: false,
+		},
+		{
+			about:  "no values",
+			vs:     []string{},
+			result: false,
+		},
+		{
+			about:  "3 empty strings",
+			vs:     []string{"", "", ""},
+			result: false,
+		},
+		{
+			about:  "3 empty strings, 1 non-empty",
+			vs:     []string{"", "", "", "x"},
+			result: true,
+		},
+		{
+			about:  "3 empty strings, 2 non-empty",
+			vs:     []string{"", "", "", "x", "y"},
+			result: true,
+		},
+	}
+	for _, c := range cases {
+		result := anyString(c.vs...)
+		if result != c.result {
+			t.Fatalf("[%s] got %v, want %v", c.about, result, c.result)
+		}
+	}
+}
+
+func TestFindElementText(t *testing.T) {
+	var cases = []struct {
+		about  string
+		elem   *etree.Element
+		path   string
+		result string
+	}{
+		{
+			about:  "nil element",
+			elem:   mustElementFromString(""),
+			path:   "",
+			result: "",
+		},
+	}
+	for _, c := range cases {
+		result := findElementText(c.elem, c.path)
+		if !reflect.DeepEqual(result, c.result) {
+			t.Fatalf("[%s] got %v, want %v", c.about, result, c.result)
+		}
+	}
+}
+
 func TestIterTextTrimSpace(t *testing.T) {
 	var cases = []struct {
 		about  string
@@ -15,32 +77,32 @@ func TestIterTextTrimSpace(t *testing.T) {
 	}{
 		{
 			"empty string",
-			elementFromString(""),
+			mustElementFromString(""),
 			nil,
 		},
 		{
 			"1 tag, no text",
-			elementFromString("<a></a>"),
+			mustElementFromString("<a></a>"),
 			nil,
 		},
 		{
 			"1 tag, text",
-			elementFromString("<a>hello</a>"),
+			mustElementFromString("<a>hello</a>"),
 			[]string{"hello"},
 		},
 		{
 			"2 tags, text",
-			elementFromString("<a>hello <b>world</b></a>"),
+			mustElementFromString("<a>hello <b>world</b></a>"),
 			[]string{"hello", "world"},
 		},
 		{
 			"2 tags, text, tail",
-			elementFromString("<a>hello <b>world</b>!</a>"),
+			mustElementFromString("<a>hello <b>world</b>!</a>"),
 			[]string{"hello", "world", "!"},
 		},
 		{
 			"3 tags, text, tail, whitespace",
-			elementFromString("<a>hello <b>world</b><b>...  </b>  !</a>"),
+			mustElementFromString("<a>hello <b>world</b><b>...  </b>  !</a>"),
 			[]string{"hello", "world", "...", "!"},
 		},
 	}
@@ -52,9 +114,9 @@ func TestIterTextTrimSpace(t *testing.T) {
 	}
 }
 
-// elementFromString returns the root element from a given XML snippet. Will
+// mustElementFromString returns the root element from a given XML snippet. Will
 // panic, if the XML is not parseable.
-func elementFromString(xmlText string) *etree.Element {
+func mustElementFromString(xmlText string) *etree.Element {
 	doc := etree.NewDocument()
 	if err := doc.ReadFromString(xmlText); err != nil {
 		panic(err)
