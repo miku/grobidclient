@@ -7,6 +7,44 @@ import (
 	"github.com/beevik/etree"
 )
 
+func TestParseBiblio(t *testing.T) {}
+
+func TestCleanURL(t *testing.T) {
+	var cases = []struct {
+		about  string
+		u      string
+		result string
+	}{
+		{
+			about:  "empty",
+			u:      "",
+			result: "",
+		},
+		{
+			about:  "already ok",
+			u:      "http://archive.org",
+			result: "http://archive.org",
+		},
+		{
+			about:  "last accessed",
+			u:      "http://archive.org.Lastaccessed",
+			result: "http://archive.org",
+		},
+		{
+			about:  "< prefix",
+			u:      "<http://archive.org.Lastaccessed",
+			result: "http://archive.org",
+		},
+		// TODO: add more
+	}
+	for _, c := range cases {
+		result := cleanURL(c.u)
+		if result != c.result {
+			t.Fatalf("[%s] got %v, want %v", c.about, result, c.result)
+		}
+	}
+}
+
 func TestAnyString(t *testing.T) {
 	var cases = []struct {
 		about  string
