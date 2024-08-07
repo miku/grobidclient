@@ -18,6 +18,31 @@ func TestIterTextTrimSpace(t *testing.T) {
 			elementFromString(""),
 			nil,
 		},
+		{
+			"1 tag, no text",
+			elementFromString("<a></a>"),
+			nil,
+		},
+		{
+			"1 tag, text",
+			elementFromString("<a>hello</a>"),
+			[]string{"hello"},
+		},
+		{
+			"2 tags, text",
+			elementFromString("<a>hello <b>world</b></a>"),
+			[]string{"hello", "world"},
+		},
+		{
+			"2 tags, text, tail",
+			elementFromString("<a>hello <b>world</b>!</a>"),
+			[]string{"hello", "world", "!"},
+		},
+		{
+			"3 tags, text, tail, whitespace",
+			elementFromString("<a>hello <b>world</b><b>...  </b>  !</a>"),
+			[]string{"hello", "world", "...", "!"},
+		},
 	}
 	for _, c := range cases {
 		result := iterTextTrimSpace(c.input)
