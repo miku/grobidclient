@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 
 	"github.com/beevik/etree"
@@ -33,7 +32,6 @@ func ParseDocument(r io.Reader) error {
 	if header == nil {
 		return ErrInvalidDocument
 	}
-	log.Println(header)
 	applicationTags := header.FindElements(
 		fmt.Sprintf(".//appInfo[namespace-uri()=%q]/application[namespace-uri()=%q]", NS, NS))
 	if len(applicationTags) == 0 {
@@ -47,8 +45,12 @@ func ParseDocument(r io.Reader) error {
 	doc := GrobidDocument{
 		GrobidVersion: version,
 		GrobidTs:      ts,
+		Header:        *parseBiblio(header),
+		PDFMD5:        findElementText(header, `.//idno[@type="MD5"]`),
 	}
-	log.Println(doc)
+	for i, bs := range tei.FindElements(`.//listBibl/biblStruct`) {
+		//TODO
+	}
 	return nil
 }
 
@@ -187,10 +189,53 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 		ISSN:    findElementText(`.//idno[@type="ISSN"]`),
 		EISSN:   findElementText(`.//idno[@type="eISSN"]`),
 	}
-	// TODO: bookTitleTag
-
-	return nil
-
+	bookTitleTag := elem.FindElement(`.//title[@level="m"]`) // TODO: NS
+	if bookTitleTag != nil && bookTitleTag.SelectAttrValue("type", "") == "" {
+		biblio.BookTitle = bookTitleTag.Text()
+	}
+	if biblio.BookTitle != "" && biblio.Title == "" {
+		biblio.Title = biblio.BookTitle
+		biblio.BookTitle = ""
+	}
+	noteTag := elem.FindElement(`.//note`)
+	if noteTag != nil && noteTag.SelectAttrValue("type", "") == "" {
+		biblio.Note = noteTag.Text()
+	}
+	if biblio.Publisher == "" {
+		biblio.Publisher = findElementText(elem, `.//imprint/publisher`)
+	}
+	dateTag := elem.FindElement(`.//date[@type="published"]`)
+	if dateTag != nil {
+		biblio.Date = dateTag.SelectAttrValue("when", "")
+	}
+	if biblio.ArxivID != "" && strings.HasPrefix(biblio.ArxivID, "arXiv:") {
+		biblio.ArxivID = biblio.ArxivID[6:]
+	}
+	var el *etree.Element
+	el = elem.FindElement(`.//biblScope[@unit="page"]`) // TODO: NS
+	if el != nil {
+		if v := el.SelectAttrValue("from", ""); v != "" {
+			biblio.FirstPage = v
+		}
+		if v := el.SelectAttrValue("to", ""); v != "" {
+			biblio.LastPage = v
+		}
+		if biblio.FirstPage != "" && biblio.LastPage != "" {
+			biblio.Pages = fmt.Sprintf("%s-%s", biblio.FirstPage, biblio.LastPage)
+		} else {
+			biblio.Pages = el.Text()
+		}
+	}
+	el = elem.FindElement(`.//ptr[@target]`) // TODO: NS
+	if el != nil {
+		biblio.URL = cleanURL(el.SelectAttrValue("target", ""))
+	}
+	if biblio.DOI != "" && biblio.URL != "" {
+		if strings.Contains(biblio.URL, "://doi.org/") || strings.Contains(biblio.URL, "://dx.doi.org/") {
+			biblio.URL = ""
+		}
+	}
+	return biblio
 }
 
 type GrobidDocument struct {
