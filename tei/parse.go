@@ -17,9 +17,35 @@ const (
 
 var ErrInvalidDocument = errors.New("invalid document")
 
-func ParseCitationList() {}
-func ParseCitation()     {}
-func ParseCitations()    {}
+// ParseCitationList parses TEI-XML of one or more references. This should work
+// with either /api/processCitation or /api/processCitationList API responses
+// from GROBID.
+//
+// Note that processed citations are usually returns as a bare XML tag, not a
+// full XML document, which means that the TEI xmlns is not set. This requires
+// a tweak to all downstream parsing code to handle documents with or w/o the
+// namespace.
+func ParseCitationList(xmlText string) []*GrobidBiblio {
+	xmlText = strings.Replace(xmlText, `xmlns="http://www.tei-c.org/ns/1.0"`, ``)
+
+	tree := etree.NewDocument()
+	tree.ReadFromString(xmlText)
+	root := tree.Root()
+	if root.Tag == "biblStruct" {
+		ref := parseBiblio(root)
+		ref.Index = 0
+		return []*GrobidBiblio{ref}
+	}
+	var refs []*GrobidBiblio
+	for i, bs := range tree.FindElements(`.//biblStruct`) {
+		ref := parseBiblio(bs)
+		ref.Index = i
+		refs = append(refs, ref)
+	}
+	return refs
+}
+func ParseCitation()  {}
+func ParseCitations() {}
 
 func ParseDocument(r io.Reader) error {
 	tree := etree.NewDocument()
@@ -48,10 +74,34 @@ func ParseDocument(r io.Reader) error {
 		Header:        *parseBiblio(header),
 		PDFMD5:        findElementText(header, `.//idno[@type="MD5"]`),
 	}
+	var refs []*GrobidBiblio
 	for i, bs := range tei.FindElements(`.//listBibl/biblStruct`) {
-		//TODO
+		ref := parseBiblio(bs)
+		ref.Index = i
+		refs = append(refs, ref)
 	}
-	return nil
+	doc.Citations = refs
+	textTag := tei.FindElement(`.//text`) // TODO: NS
+	if textTag != nil {
+		if lang := textTag.SelectAttrValue("lang", ""); lang != "" {
+			// this is the 'body' language
+			doc.LanguageCode = lang
+		}
+	}
+	var el *etree.Element
+	if el = tei.FindElement(`.//profileDesc/abstract`); er != nil { // TODO: NS
+		doc.Abstract = strings.Join(iterTextTrimSpace(el), " ")
+	}
+	if el = tei.FindElement(`.//text/body`); el != nil { // TODO: NS
+		doc.Body = strings.Join(iterTextTrimSpace(el), " ")
+	}
+	if el = tei.FindElement(`.//back/div[@type="acknowledgement"]`); el != nil {
+		doc.Acknowledgement = strings.Join(iterTextTrimSpace(el), " ")
+	}
+	if el = tei.FindElement(`.//back/div[@type="annex"]`); el != nil {
+		doc.Annex = strings.Join(iterTextTrimSpace(el), " ")
+	}
+	return doc
 }
 
 func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
@@ -241,10 +291,10 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 type GrobidDocument struct {
 	GrobidVersion   string
 	GrobidTs        string
-	Header          GrobidBiblio
+	Header          *GrobidBiblio
 	PDFMD5          string
 	LanguageCode    string
-	Citations       []GrobidBiblio
+	Citations       []*GrobidBiblio
 	Abstract        string
 	Body            string
 	Acknowledgement string
@@ -269,7 +319,7 @@ type GrobidAffiliation struct {
 	Institution string
 	Department  string
 	Laboratory  string
-	Address     GrobidAddress
+	Address     *GrobidAddress
 }
 
 func (g *GrobidAffiliation) isEmpty() bool {
@@ -287,7 +337,7 @@ type GrobidAuthor struct {
 }
 
 type GrobidBiblio struct {
-	Authors       []GrobidAuthor
+	Authors       []*GrobidAuthor
 	Index         int
 	ID            string
 	Unstructured  string
@@ -295,7 +345,7 @@ type GrobidBiblio struct {
 	Title         string
 	BookTitle     string
 	SeriesTitle   string
-	Editor        []GrobidAuthor
+	Editor        []*GrobidAuthor
 	Journal       string
 	JournalAbbrev string
 	Publisher     string
