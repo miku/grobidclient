@@ -26,7 +26,7 @@ var ErrInvalidDocument = errors.New("invalid document")
 // a tweak to all downstream parsing code to handle documents with or w/o the
 // namespace.
 func ParseCitationList(xmlText string) []*GrobidBiblio {
-	xmlText = strings.Replace(xmlText, `xmlns="http://www.tei-c.org/ns/1.0"`, ``)
+	xmlText = strings.Replace(xmlText, `xmlns="http://www.tei-c.org/ns/1.0"`, ``, 1)
 
 	tree := etree.NewDocument()
 	tree.ReadFromString(xmlText)
@@ -44,8 +44,23 @@ func ParseCitationList(xmlText string) []*GrobidBiblio {
 	}
 	return refs
 }
-func ParseCitation()  {}
-func ParseCitations() {}
+
+func ParseCitation(xmlText string) *GrobidBiblio {
+	cl := ParseCitationList(xmlText)
+	if len(cl) == 0 {
+		return nil
+	}
+	c := cl[0]
+	c.Index = -1
+	if c.IsEmpty() {
+		return nil
+	}
+	return c
+}
+
+func ParseCitations(xmlText string) []*GrobidBiblio {
+	return ParseCitationList(xmlText)
+}
 
 func ParseDocument(r io.Reader) error {
 	tree := etree.NewDocument()
@@ -71,7 +86,7 @@ func ParseDocument(r io.Reader) error {
 	doc := GrobidDocument{
 		GrobidVersion: version,
 		GrobidTs:      ts,
-		Header:        *parseBiblio(header),
+		Header:        parseBiblio(header),
 		PDFMD5:        findElementText(header, `.//idno[@type="MD5"]`),
 	}
 	var refs []*GrobidBiblio
@@ -89,7 +104,7 @@ func ParseDocument(r io.Reader) error {
 		}
 	}
 	var el *etree.Element
-	if el = tei.FindElement(`.//profileDesc/abstract`); er != nil { // TODO: NS
+	if el = tei.FindElement(`.//profileDesc/abstract`); el != nil { // TODO: NS
 		doc.Abstract = strings.Join(iterTextTrimSpace(el), " ")
 	}
 	if el = tei.FindElement(`.//text/body`); el != nil { // TODO: NS
