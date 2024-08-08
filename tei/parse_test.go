@@ -24,10 +24,54 @@ func TestExampleGrobidTei(t *testing.T) {
 	if err != nil {
 		t.Fatalf("got %v, want %v", err, nil)
 	}
-	want := `Changes of patients' satisfaction with the health care services in Lithuanian Health Promoting Hospitals network`
+	var want string
+	want = `Changes of patients' satisfaction with the health care services in Lithuanian Health Promoting Hospitals network`
 	if doc.Header.Title != want {
 		t.Fatalf("title: got %v, want %v", doc.Header.Title, want)
 	}
+	var ref *GrobidBiblio
+	for _, c := range doc.Citations {
+		if c.ID == "b12" {
+			ref = c
+			break
+		}
+	}
+	if ref == nil {
+		t.Fatalf("expected a non-nil ref")
+	}
+	if len(ref.Authors) == 0 {
+		t.Fatalf("expected authors")
+	}
+	author0 := ref.Authors[0]
+	if want := "K Tasa"; author0.FullName != want {
+		t.Fatalf("got %v, want %v", author0.FullName, want)
+	}
+	if want := "K"; author0.GivenName != want {
+		t.Fatalf("got %v, want %v", author0.GivenName, want)
+	}
+	if want := "Tasa"; author0.Surname != want {
+		t.Fatalf("got %v, want %v", author0.Surname, want)
+	}
+	if want := "Quality Management in Health Care"; ref.Journal != want {
+		t.Fatalf("got %v, want %v", ref.Journal, want)
+	}
+	if want := "Using patient feedback for quality improvement"; ref.Title != want {
+		t.Fatalf("got %v, want %v", ref.Title, want)
+	}
+	if want := "1996"; ref.Date != want {
+		t.Fatalf("got %v, want %v", ref.Date, want)
+	}
+	if want := "206-225"; ref.Pages != want {
+		t.Fatalf("got %v, want %v", ref.Pages, want)
+	}
+	if want := "8"; ref.Volume != want {
+		t.Fatalf("got %v, want %v", ref.Volume, want)
+	}
+	want = `Tasa K, Baker R, Murray M. Using patient feedback for qua- lity improvement. Quality Management in Health Care 1996;8:206-19.`
+	if ref.Unstructured != want {
+		t.Fatalf("got %v, want %v", ref.Unstructured, want)
+	}
+
 }
 
 func TestInvalidXML(t *testing.T) {

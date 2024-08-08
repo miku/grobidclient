@@ -38,6 +38,7 @@
           "surname": "Seaperson"
         }
       ],
+      "id": "b0",
       "date": "2001",
       "title": "Everything is Wonderful",
       "journal": "Letters in the Alphabet",
@@ -48,6 +49,7 @@
     },
     {
       "index": 1,
+      "id": "b1",
       "date": "2011-03-28",
       "title": "All about Facts",
       "journal": "The Dictionary",

@@ -241,8 +241,8 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 	biblio := &GrobidBiblio{
 		Authors:      authors,
 		Editors:      editors,
-		ID:           elem.SelectAttrValue(`{http://www.w3.org/XML/1998/namespace}id`, ""), // TODO: check NS
-		Unstructured: findElementText(elem, `.//note[@type="raw_reference"]`),              // TODO: NS
+		ID:           elem.SelectAttrValue(`id`, ""),                          // TODO: check NS
+		Unstructured: findElementText(elem, `.//note[@type="raw_reference"]`), // TODO: NS
 		// date below
 		// titles: @level=a for article, @level=m for manuscrupt (book)
 		Title:         findElementText(elem, `.//title[@type="main"]`),
