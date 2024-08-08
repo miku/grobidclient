@@ -14,9 +14,29 @@ import (
 
 func TestParseBiblio(t *testing.T) {}
 
+func TestExampleGrobidTei(t *testing.T) {
+	f, err := os.Open("../testdata/document/example.tei.xml")
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	defer f.Close()
+	doc, err := ParseDocument(f)
+	if err != nil {
+		t.Fatalf("got %v, want %v", err, nil)
+	}
+	want := `Changes of patients' satisfaction with the health care services in Lithuanian Health Promoting Hospitals network`
+	if doc.Header.Title != want {
+		t.Fatalf("title: got %v, want %v", doc.Header.Title, want)
+	}
+}
+
 func TestInvalidXML(t *testing.T) {
 	var err error
 	_, err = ParseDocument(strings.NewReader(`this is not XML`))
+	if err != ErrInvalidDocument {
+		t.Fatalf("got %v, want %v", err, ErrInvalidDocument)
+	}
+	_, err = ParseDocument(strings.NewReader(`<xml></xml>`))
 	if err != ErrInvalidDocument {
 		t.Fatalf("got %v, want %v", err, ErrInvalidDocument)
 	}
