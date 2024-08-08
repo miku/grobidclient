@@ -84,7 +84,7 @@ type Options struct {
 	CreateHashSymlinks     bool
 }
 
-// writeFields writes set flags to a writer.
+// writeFields writes set flags to a writer. TODO: TEICoordinates?
 func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.ConsolidateCitations {
 		w.WriteField("consolidateCitations", "1")
