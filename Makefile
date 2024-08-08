@@ -20,6 +20,8 @@ all: $(TARGETS)
 .PHONY: clean
 clean:
 	rm -f $(TARGETS)
+	rm -f c.out
+	rm -f c.html
 
 .PHONY: update-all-deps
 update-all-deps:
