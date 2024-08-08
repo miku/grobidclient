@@ -40,8 +40,8 @@ var (
 	includeRawCitations    = flag.Bool("irc", false, "include raw citations")
 	includeRawAffiliations = flag.Bool("ira", false, "include raw affiliations")
 	forceReprocess         = flag.Bool("force", false, "force reprocess")
-	teiCoordinates         = flag.Bool("tei", false, "add pdf coordinates")
 	segmentSentences       = flag.Bool("ss", false, "segment sentences")
+	// TODO: add teicoordniates
 )
 
 func recommendedNumWorkers() int {
@@ -160,7 +160,7 @@ func main() {
 		ConsolidateCitations:   *consolidateCitations,
 		IncludeRawCitations:    *includeRawCitations,
 		IncluseRawAffiliations: *includeRawAffiliations,
-		TEICoordinates:         *teiCoordinates,
+		TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,

@@ -61,7 +61,7 @@ var DefaultOptions = &Options{
 	ConsolidateCitations:   true,
 	IncludeRawCitations:    true,
 	IncluseRawAffiliations: true,
-	TEICoordinates:         true,
+	TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
 	SegmentSentences:       true,
 	Force:                  false,
 	Verbose:                false,
@@ -76,7 +76,7 @@ type Options struct {
 	ConsolidateCitations   bool
 	IncludeRawCitations    bool
 	IncluseRawAffiliations bool
-	TEICoordinates         bool
+	TEICoordinates         []string
 	SegmentSentences       bool
 	Force                  bool
 	Verbose                bool
