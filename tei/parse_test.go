@@ -14,6 +14,18 @@ import (
 
 func TestParseBiblio(t *testing.T) {}
 
+func TestInvalidXML(t *testing.T) {
+	var err error
+	_, err = ParseDocument(strings.NewReader(`this is not XML`))
+	if err != ErrInvalidDocument {
+		t.Fatalf("got %v, want %v", err, ErrInvalidDocument)
+	}
+	doc := ParseCitations(`this is not XML`)
+	if doc != nil {
+		t.Fatalf("got %v, want %v", doc, nil)
+	}
+}
+
 // TestParseSmall tests parsing. Use TEST_SNAPSHOT=1 for creating a snapshot.
 func TestParseSmall(t *testing.T) {
 	f, err := os.Open("../testdata/small.xml")

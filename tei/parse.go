@@ -31,6 +31,9 @@ func ParseCitationList(xmlText string) []*GrobidBiblio {
 	tree := etree.NewDocument()
 	tree.ReadFromString(xmlText)
 	root := tree.Root()
+	if root == nil {
+		return nil
+	}
 	if root.Tag == "biblStruct" {
 		ref := parseBiblio(root)
 		ref.Index = 0
@@ -69,6 +72,9 @@ func ParseDocument(r io.Reader) (*GrobidDocument, error) {
 		return nil, err
 	}
 	tei := tree.Root()
+	if tei == nil {
+		return nil, ErrInvalidDocument
+	}
 	header := tei.FindElement(fmt.Sprintf(".//teiHeader[namespace-uri()=%q]", NS))
 	if header == nil {
 		return nil, ErrInvalidDocument
