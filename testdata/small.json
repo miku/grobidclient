@@ -1,0 +1,32 @@
+{
+  "grobid_version": "0.5.1-SNAPSHOT",
+  "grobid_ts": "2018-04-02T00:31+0000",
+  "header": {
+    "date": "2000",
+    "title": "Dummy Example File",
+    "book_title": "Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678"
+  },
+  "lang": "en",
+  "citations": [
+    {
+      "date": "2001",
+      "title": "Everything is Wonderful",
+      "journal": "Letters in the Alphabet",
+      "volume": "20",
+      "pages": "1-11",
+      "first_page": "1",
+      "last_page": "11"
+    },
+    {
+      "index": 1,
+      "date": "2011-03-28",
+      "title": "All about Facts",
+      "journal": "The Dictionary",
+      "volume": "14",
+      "note": "author signed copy"
+    }
+  ],
+  "abstract": "Everything you ever wanted to know about nothing",
+  "body": "Introduction Everything starts somewhere, as somebody [1] once said. In Depth Meat You know, for kids. Potatos QED."
+}
+

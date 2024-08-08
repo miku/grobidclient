@@ -10,4 +10,8 @@ require (
 	github.com/slyrz/warc v0.0.0-20150806225202-a50edd19b690
 )
 
-require golang.org/x/net v0.27.0 // indirect
+require (
+	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 // indirect
+	github.com/sergi/go-diff v1.3.1 // indirect
+	golang.org/x/net v0.27.0 // indirect
+)

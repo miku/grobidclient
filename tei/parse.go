@@ -304,16 +304,16 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 }
 
 type GrobidDocument struct {
-	GrobidVersion   string          `json:"grobid_version"`
-	GrobidTs        string          `json:"grobid_ts"`
-	Header          *GrobidBiblio   `json:"header"`
-	PDFMD5          string          `json:"pdfmd5"`
-	LanguageCode    string          `json:"lang"`
-	Citations       []*GrobidBiblio `json:"citations"`
-	Abstract        string          `json:"abstract"`
-	Body            string          `json:"body"`
-	Acknowledgement string          `json:"acknowledgement"`
-	Annex           string          `json:"annex"`
+	GrobidVersion   string          `json:"grobid_version,omitempty"`
+	GrobidTs        string          `json:"grobid_ts,omitempty"`
+	Header          *GrobidBiblio   `json:"header,omitempty"`
+	PDFMD5          string          `json:"pdfmd5,omitempty"`
+	LanguageCode    string          `json:"lang,omitempty"`
+	Citations       []*GrobidBiblio `json:"citations,omitempty"`
+	Abstract        string          `json:"abstract,omitempty"`
+	Body            string          `json:"body,omitempty"`
+	Acknowledgement string          `json:"acknowledgement,omitempty"`
+	Annex           string          `json:"annex,omitempty"`
 }
 
 func (g *GrobidDocument) RemoveEncumbered() {
@@ -324,17 +324,17 @@ func (g *GrobidDocument) RemoveEncumbered() {
 }
 
 type GrobidAddress struct {
-	AddrLine   string
-	PostCode   string
-	Settlement string
-	Country    string
+	AddrLine   string `json:"line,omitempty"`
+	PostCode   string `json:"postcode,omitempty"`
+	Settlement string `json:"settlement,omitempty"`
+	Country    string `json:"country,omitempty"`
 }
 
 type GrobidAffiliation struct {
-	Institution string
-	Department  string
-	Laboratory  string
-	Address     *GrobidAddress
+	Institution string         `json:"institution,omitempty"`
+	Department  string         `json:"department,omitempty"`
+	Laboratory  string         `json:"laboratory,omitempty"`
+	Address     *GrobidAddress `json:"address,omitempty"`
 }
 
 func (g *GrobidAffiliation) isEmpty() bool {
@@ -342,45 +342,45 @@ func (g *GrobidAffiliation) isEmpty() bool {
 }
 
 type GrobidAuthor struct {
-	FullName    string
-	GivenName   string
-	MiddleName  string
-	Surname     string
-	Email       string
-	ORCID       string
-	Affiliation *GrobidAffiliation
+	FullName    string             `json:"full_name,omitempty"`
+	GivenName   string             `json:"given_name,omitempty"`
+	MiddleName  string             `json:"middle_name,omitempty"`
+	Surname     string             `json:"surname,omitempty"`
+	Email       string             `json:"email,omitempty"`
+	ORCID       string             `json:"orcid,omitempty"`
+	Affiliation *GrobidAffiliation `json:"aff,omitempty"`
 }
 
 type GrobidBiblio struct {
-	Authors       []*GrobidAuthor
-	Index         int
-	ID            string
-	Unstructured  string
-	Date          string
-	Title         string
-	BookTitle     string
-	SeriesTitle   string
-	Editors       []*GrobidAuthor
-	Journal       string
-	JournalAbbrev string
-	Publisher     string
-	Institution   string
-	ISSN          string
-	EISSN         string
-	Volume        string
-	Issue         string
-	Pages         string
-	FirstPage     string
-	LastPage      string
-	Note          string
-	DOI           string
-	PMID          string
-	PMCID         string
-	ArxivID       string
-	PII           string
-	Ark           string
-	IsTexID       string
-	URL           string
+	Authors       []*GrobidAuthor `json:"authors,omitempty"`
+	Index         int             `json:"index,omitempty"`
+	ID            string          `json:"id,omitempty"`
+	Unstructured  string          `json:"unstructured,omitempty"`
+	Date          string          `json:"date,omitempty"`
+	Title         string          `json:"title,omitempty"`
+	BookTitle     string          `json:"book_title,omitempty"`
+	SeriesTitle   string          `json:"series_title,omitempty"`
+	Editors       []*GrobidAuthor `json:"editors,omitempty"`
+	Journal       string          `json:"journal,omitempty"`
+	JournalAbbrev string          `json:"journal_abbrev,omitempty"`
+	Publisher     string          `json:"publisher,omitempty"`
+	Institution   string          `json:"institution,omitempty"`
+	ISSN          string          `json:"issn,omitempty"`
+	EISSN         string          `json:"eissn,omitempty"`
+	Volume        string          `json:"volume,omitempty"`
+	Issue         string          `json:"issue,omitempty"`
+	Pages         string          `json:"pages,omitempty"`
+	FirstPage     string          `json:"first_page,omitempty"`
+	LastPage      string          `json:"last_page,omitempty"`
+	Note          string          `json:"note,omitempty"`
+	DOI           string          `json:"doi,omitempty"`
+	PMID          string          `json:"pmid,omitempty"`
+	PMCID         string          `json:"pmcid,omitempty"`
+	ArxivID       string          `json:"arxiv_id,omitempty"`
+	PII           string          `json:"pii,omitempty"`
+	Ark           string          `json:"ark,omitempty"`
+	IsTexID       string          `json:"is_tex_id,omitempty"`
+	URL           string          `json:"url,omitempty"`
 }
 
 func (g *GrobidBiblio) IsEmpty() bool {

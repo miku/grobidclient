@@ -1,17 +1,20 @@
 package tei
 
 import (
+	"encoding/json"
+	"log"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/andreyvit/diff"
 	"github.com/beevik/etree"
 )
 
 func TestParseBiblio(t *testing.T) {}
 
 func TestParseSmall(t *testing.T) {
-	t.Log(os.Getwd())
 	f, err := os.Open("../testdata/small.xml")
 	if err != nil {
 		t.Fatalf("read: %v", err)
@@ -21,7 +24,19 @@ func TestParseSmall(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	t.Log(doc)
+	b, err := json.MarshalIndent(doc, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	got := strings.TrimSpace(string(b))            // JSON view of parsed data
+	b, err = os.ReadFile("../testdata/small.json") // snapshot
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	want := strings.TrimSpace(string(b))
+	if got != want {
+		t.Fatalf("parse mismatch: %s", diff.LineDiff(got, want))
+	}
 }
 
 func TestCleanURL(t *testing.T) {
@@ -177,3 +192,20 @@ func mustElementFromString(xmlText string) *etree.Element {
 	return doc.Root()
 
 }
+
+// // diffJsonFile compares a JSON serialization of v with the content of a file.
+// func diffJsonFile(v any, filename expected) ([]diffpathmatch.Diff, error) {
+// 	var buf bytes.Buffer
+// 	enc := json.NewEncoder(&buf)
+// 	if err := enc.Encode(v); err != nil {
+// 		return nil, err
+// 	}
+// 	b, err := os.ReadFile(filename)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	dmp := diffmatchpatch.New()
+// 	diffs := dmp.DiffMain(buf.String(), string(b), false)
+// 	return diffs, nil
+//
+// }
