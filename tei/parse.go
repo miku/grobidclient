@@ -304,16 +304,16 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 }
 
 type GrobidDocument struct {
-	GrobidVersion   string
-	GrobidTs        string
-	Header          *GrobidBiblio
-	PDFMD5          string
-	LanguageCode    string
-	Citations       []*GrobidBiblio
-	Abstract        string
-	Body            string
-	Acknowledgement string
-	Annex           string
+	GrobidVersion   string          `json:"grobid_version"`
+	GrobidTs        string          `json:"grobid_ts"`
+	Header          *GrobidBiblio   `json:"header"`
+	PDFMD5          string          `json:"pdfmd5"`
+	LanguageCode    string          `json:"lang"`
+	Citations       []*GrobidBiblio `json:"citations"`
+	Abstract        string          `json:"abstract"`
+	Body            string          `json:"body"`
+	Acknowledgement string          `json:"acknowledgement"`
+	Annex           string          `json:"annex"`
 }
 
 func (g *GrobidDocument) RemoveEncumbered() {

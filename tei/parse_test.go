@@ -1,6 +1,7 @@
 package tei
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -8,6 +9,20 @@ import (
 )
 
 func TestParseBiblio(t *testing.T) {}
+
+func TestParseSmall(t *testing.T) {
+	t.Log(os.Getwd())
+	f, err := os.Open("../testdata/small.xml")
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	defer f.Close()
+	doc, err := ParseDocument(f)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	t.Log(doc)
+}
 
 func TestCleanURL(t *testing.T) {
 	var cases = []struct {
