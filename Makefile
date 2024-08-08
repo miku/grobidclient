@@ -5,6 +5,12 @@ TARGETS := grobidcli
 test:
 	go test -v -cover ./...
 
+.PHONY: cover
+cover:
+	go test -v -cover -coverprofile=c.out ./...
+	go tool cover -html="c.out" -o c.html
+	# open c.html
+
 .PHONY: all
 all: $(TARGETS)
 
