@@ -268,6 +268,107 @@ func TestIterTextTrimSpace(t *testing.T) {
 	}
 }
 
+func TestSingleCitations(t *testing.T) {
+	var data = `
+<biblStruct>
+    <analytic>
+        <title level="a" type="main">Mesh migration following abdominal hernia repair: a comprehensive review</title>
+        <author>
+            <persName
+                xmlns="http://www.tei-c.org/ns/1.0">
+                <forename type="first">H</forename>
+                <forename type="middle">B</forename>
+                <surname>Cunningham</surname>
+            </persName>
+        </author>
+        <author>
+            <persName
+                xmlns="http://www.tei-c.org/ns/1.0">
+                <forename type="first">J</forename>
+                <forename type="middle">J</forename>
+                <surname>Weis</surname>
+            </persName>
+        </author>
+        <author>
+            <persName
+                xmlns="http://www.tei-c.org/ns/1.0">
+                <forename type="first">L</forename>
+                <forename type="middle">R</forename>
+                <surname>Taveras</surname>
+            </persName>
+        </author>
+        <author>
+            <persName
+                xmlns="http://www.tei-c.org/ns/1.0">
+                <forename type="first">S</forename>
+                <surname>Huerta</surname>
+            </persName>
+        </author>
+        <idno type="DOI">10.1007/s10029-019-01898-9</idno>
+        <idno type="PMID">30701369</idno>
+    </analytic>
+    <monogr>
+        <title level="j">Hernia</title>
+        <imprint>
+            <biblScope unit="volume">23</biblScope>
+            <biblScope unit="issue">2</biblScope>
+            <biblScope unit="page" from="235" to="243" />
+            <date type="published" when="2019-01-30" />
+        </imprint>
+    </monogr>
+</biblStruct>"
+	`
+	doc := ParseCitation(data)
+	if doc == nil {
+		t.Fatal("expected non nil result")
+	}
+	if doc.IsEmpty() != false {
+		t.Fatal("empty: want false")
+	}
+	if want := `Mesh migration following abdominal hernia repair: a comprehensive review`; doc.Title != want {
+		t.Fatalf("got %s, want %v", doc.Title, want)
+	}
+	if len(doc.Authors) < 3 {
+		t.Fatalf("expeted at least 3 authors")
+	}
+	if want := `L`; doc.Authors[2].GivenName != want {
+		t.Fatalf("got %v, want %v", doc.Authors[2].GivenName, want)
+	}
+	if want := `R`; doc.Authors[2].MiddleName != want {
+		t.Fatalf("got %v, want %v", doc.Authors[2].MiddleName, want)
+	}
+	if want := `Taveras`; doc.Authors[2].Surname != want {
+		t.Fatalf("got %v, want %v", doc.Authors[2].Surname, want)
+	}
+	if want := `L R Taveras`; doc.Authors[2].FullName != want {
+		t.Fatalf("got %v, want %v", doc.Authors[2].FullName, want)
+	}
+	if want := `10.1007/s10029-019-01898-9`; doc.DOI != want {
+		t.Fatalf("got %v, want %v", doc.DOI, want)
+	}
+	if want := `30701369`; doc.PMID != want {
+		t.Fatalf("got %v, want %v", doc.PMID, want)
+	}
+	if want := `2019-01-30`; doc.Date != want {
+		t.Fatalf("got %v, want %v", doc.Date, want)
+	}
+	if want := `235-243`; doc.Pages != want {
+		t.Fatalf("got %v, want %v", doc.Pages, want)
+	}
+	if want := `235`; doc.FirstPage != want {
+		t.Fatalf("got %v, want %v", doc.FirstPage, want)
+	}
+	if want := `243`; doc.LastPage != want {
+		t.Fatalf("got %v, want %v", doc.LastPage, want)
+	}
+	if want := `2`; doc.Issue != want {
+		t.Fatalf("got %v, want %v", doc.Issue, want)
+	}
+	if want := `Hernia`; doc.Journal != want {
+		t.Fatalf("got %v, want %v", doc.Journal, want)
+	}
+}
+
 // mustElementFromString returns the root element from a given XML snippet. Will
 // panic, if the XML is not parseable.
 func mustElementFromString(xmlText string) *etree.Element {
@@ -276,22 +377,4 @@ func mustElementFromString(xmlText string) *etree.Element {
 		panic(err)
 	}
 	return doc.Root()
-
 }
-
-// // diffJsonFile compares a JSON serialization of v with the content of a file.
-// func diffJsonFile(v any, filename expected) ([]diffpathmatch.Diff, error) {
-// 	var buf bytes.Buffer
-// 	enc := json.NewEncoder(&buf)
-// 	if err := enc.Encode(v); err != nil {
-// 		return nil, err
-// 	}
-// 	b, err := os.ReadFile(filename)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	dmp := diffmatchpatch.New()
-// 	diffs := dmp.DiffMain(buf.String(), string(b), false)
-// 	return diffs, nil
-//
-// }
