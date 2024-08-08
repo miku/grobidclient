@@ -121,26 +121,30 @@ func ParseDocument(r io.Reader) (*GrobidDocument, error) {
 
 func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
 	ga := &GrobidAffiliation{}
-	for _, e := range elem.FindElements(fmt.Sprintf(`./orgName[namespace-uri=%q]`, NS)) {
-		orgTypeAttr := e.SelectAttr("type")
-		if orgTypeAttr == nil {
-			continue
-		}
-		switch orgTypeAttr.Value {
+	for _, e := range elem.FindElements(`./orgName`) {
+		switch e.SelectAttrValue("type", "") {
 		case "institution":
 			ga.Institution = e.Text()
 		case "department":
 			ga.Department = e.Text()
 		case "laboratory":
 			ga.Laboratory = e.Text()
+		default:
+			continue
 		}
 	}
 	if ga.isEmpty() {
 		return nil
 	}
-	addrTag := elem.FindElement(fmt.Sprintf("./address[namespace-uri=%q]", NS))
+	addrTag := elem.FindElement("./address")
 	if addrTag != nil {
-		// TODO: add address
+		addr := &GrobidAddress{
+			AddrLine:   findElementText(addrTag, `./addrLine`),
+			PostCode:   findElementText(addrTag, `./postCode`),
+			Settlement: findElementText(addrTag, `./settlement`),
+			Country:    findElementText(addrTag, `./country`),
+		}
+		ga.Address = addr
 	}
 	return ga
 }
@@ -149,17 +153,17 @@ func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
 // a GrobidAuthor struct. An author could appear in the document headers or
 // citations.
 func parseAuthor(elem *etree.Element) *GrobidAuthor {
-	persNameTag := elem.FindElement(fmt.Sprintf("./persName[namespace-uri=%q]", NS))
+	persNameTag := elem.FindElement("./persName")
 	if persNameTag == nil {
 		return nil
 	}
-	ga := parsePersName(elem)
+	ga := parsePersName(persNameTag)
 	if ga == nil {
 		return nil
 	}
 	ga.ORCID = findElementText(elem, `./idno[@type="ORCID"]`) // TODO: NS
 	ga.Email = findElementText(elem, `./email`)               // TODO: NS
-	affiliationTag := elem.FindElement(fmt.Sprintf(`./affiliation[namespace-uri=%q]`, NS))
+	affiliationTag := elem.FindElement(`./affiliation`)
 	if affiliationTag != nil {
 		ga.Affiliation = parseAffiliation(affiliationTag)
 	}
@@ -211,7 +215,7 @@ func parsePersName(elem *etree.Element) *GrobidAuthor {
 
 func parseBiblio(elem *etree.Element) *GrobidBiblio {
 	var authors []*GrobidAuthor
-	for _, ela := range elem.FindElements(fmt.Sprintf(`./author[namespace-uri=%q]`, NS)) {
+	for _, ela := range elem.FindElements(`.//author`) {
 		a := parseAuthor(ela)
 		if a == nil {
 			continue

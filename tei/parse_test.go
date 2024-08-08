@@ -14,6 +14,7 @@ import (
 
 func TestParseBiblio(t *testing.T) {}
 
+// TestParseSmall tests parsing. Use TEST_SNAPSHOT=1 for creating a snapshot.
 func TestParseSmall(t *testing.T) {
 	f, err := os.Open("../testdata/small.xml")
 	if err != nil {
@@ -28,14 +29,23 @@ func TestParseSmall(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	got := strings.TrimSpace(string(b))            // JSON view of parsed data
-	b, err = os.ReadFile("../testdata/small.json") // snapshot
-	if err != nil {
-		t.Fatalf("read: %v", err)
-	}
-	want := strings.TrimSpace(string(b))
-	if got != want {
-		t.Fatalf("parse mismatch: %s", diff.LineDiff(got, want))
+	got := strings.TrimSpace(string(b)) // JSON view of parsed data
+	snapshotFn := "../testdata/small.json"
+	switch os.Getenv("TEST_SNAPSHOT") {
+	case "1", "true", "yes", "on":
+		t.Logf("writing snapshot to %s", snapshotFn)
+		if err := os.WriteFile(snapshotFn, b, 0755); err != nil {
+			t.Fatalf("failed to write snapshot: %v", err)
+		}
+	default:
+		b, err = os.ReadFile(snapshotFn) // snapshot
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		want := strings.TrimSpace(string(b))
+		if got != want {
+			t.Fatalf("parse mismatch: %s", diff.LineDiff(got, want))
+		}
 	}
 }
 

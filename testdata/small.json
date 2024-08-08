@@ -2,6 +2,28 @@
   "grobid_version": "0.5.1-SNAPSHOT",
   "grobid_ts": "2018-04-02T00:31+0000",
   "header": {
+    "authors": [
+      {
+        "full_name": "Brewster Kahle",
+        "given_name": "Brewster",
+        "surname": "Kahle",
+        "aff": {
+          "institution": "Technion-Israel Institute of Technology",
+          "department": "Faculty ofAgricultrial Engineering",
+          "laboratory": "Plant Physiology Laboratory",
+          "address": {
+            "postcode": "32000",
+            "settlement": "Haifa",
+            "country": "Israel"
+          }
+        }
+      },
+      {
+        "full_name": "J Doe",
+        "given_name": "J",
+        "surname": "Doe"
+      }
+    ],
     "date": "2000",
     "title": "Dummy Example File",
     "book_title": "Dummy Example File. Journal of Fake News. pp. 1-2. ISSN 1234-5678"
@@ -9,6 +31,13 @@
   "lang": "en",
   "citations": [
     {
+      "authors": [
+        {
+          "full_name": "A Seaperson",
+          "middle_name": "A",
+          "surname": "Seaperson"
+        }
+      ],
       "date": "2001",
       "title": "Everything is Wonderful",
       "journal": "Letters in the Alphabet",
@@ -29,4 +58,3 @@
   "abstract": "Everything you ever wanted to know about nothing",
   "body": "Introduction Everything starts somewhere, as somebody [1] once said. In Depth Meat You know, for kids. Potatos QED."
 }
-
