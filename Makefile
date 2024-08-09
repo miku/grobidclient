@@ -3,7 +3,7 @@ TARGETS := grobidcli
 
 .PHONY: test
 test:
-	go test -v -cover ./...
+	go test -short -v -cover ./...
 
 .PHONY: cover
 cover:
