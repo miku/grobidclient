@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -222,7 +223,7 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 	if opts == nil {
 		opts = DefaultOptions
 	}
-	if result == nil {
+	if result == nil || reflect.DeepEqual(result, &Result{}) {
 		return nil
 	}
 	dst := outputFilename(result.Filename, opts)
