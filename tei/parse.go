@@ -48,6 +48,7 @@ func ParseCitationList(xmlText string) []*GrobidBiblio {
 	return refs
 }
 
+// ParseCitation parses a single citation from an XML snippet. Returns nil, if none found.
 func ParseCitation(xmlText string) *GrobidBiblio {
 	cl := ParseCitationList(xmlText)
 	if len(cl) == 0 {
@@ -61,6 +62,7 @@ func ParseCitation(xmlText string) *GrobidBiblio {
 	return c
 }
 
+// ParseCitations is a legacy function ported from Python. Just calls ParseCitationList.
 func ParseCitations(xmlText string) []*GrobidBiblio {
 	return ParseCitationList(xmlText)
 }
@@ -180,7 +182,7 @@ func parseAuthor(elem *etree.Element) *GrobidAuthor {
 // only a bare string under the <editor> tag. This helper should handle these
 // cases.
 func parseEditor(elem *etree.Element) []*GrobidAuthor {
-	persNameTags := elem.FindElements(fmt.Sprintf("./persName[namespace-uri=%q]", NS))
+	persNameTags := elem.FindElements("./persName")
 	if len(persNameTags) == 0 {
 		if elem.FindElement("*") == nil {
 			rawName := elem.Text()
@@ -228,9 +230,8 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 		}
 		authors = append(authors, a)
 	}
-	// TODO: editors
 	var editors []*GrobidAuthor
-	var editorTags = elem.FindElements(fmt.Sprintf(`.//editor[namespace-uri=%q]`, NS))
+	var editorTags = elem.FindElements(`.//editor`)
 	for _, et := range editorTags {
 		editors = append(editors, parseEditor(et)...)
 	}

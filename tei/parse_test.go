@@ -14,6 +14,121 @@ import (
 
 func TestParseBiblio(t *testing.T) {}
 
+func TestEmptyCitations(t *testing.T) {
+	b, err := os.ReadFile("../testdata/citation/empty_unstructured.tei.xml")
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	mostlyEmptyXML := string(b)
+	b, err = os.ReadFile("../testdata/citation/empty.tei.xml")
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	emptyXML := string(b)
+
+	citation := ParseCitation(emptyXML)
+	if citation != nil {
+		t.Fatalf("got %v, want nil", citation)
+	}
+	citation = ParseCitation(mostlyEmptyXML)
+	if citation != nil {
+		t.Fatalf("got %v, want nil", citation)
+	}
+	d := ParseCitationList(emptyXML)
+	if d == nil {
+		t.Fatal("result: want nil")
+	}
+	if len(d) != 1 {
+		t.Fatal("len: want 1")
+	}
+	if d[0].Index != 0 {
+		t.Fatalf("index: want 0")
+	}
+	if d[0].Unstructured != "" {
+		t.Fatalf("unstructured: want empty string")
+	}
+	d = ParseCitationList(mostlyEmptyXML)
+	if d == nil {
+		t.Fatal("result: want nil")
+	}
+	if d[0].Index != 0 {
+		t.Fatalf("index: want 0")
+	}
+	if d[0].Unstructured != "blah" {
+		t.Fatalf("unstructured: want blah")
+	}
+}
+
+func TestCitationList(t *testing.T) {
+	b, err := os.ReadFile("../testdata/citation_list/example.tei.xml")
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	citations := ParseCitationList(string(b))
+	if citations == nil {
+		t.Fatalf("citations should not be nil")
+	}
+	if want := 13; len(citations) != want {
+		t.Fatalf("got %v, want %v", len(citations), want)
+	}
+	if want := "The Research Handbook on International Environmental Law"; citations[3].Note != want {
+		t.Fatalf("got %v, want %v", citations[3].Note, want)
+	}
+	if len(citations[3].Authors) != 2 {
+		t.Fatalf("author count mismatch")
+	}
+	if want := "Uhlířová"; citations[3].Authors[0].Surname != want {
+		t.Fatalf("got %v, want %v", citations[3].Authors[0].Surname, want)
+	}
+	if want := "Drumbl"; citations[3].Authors[1].Surname != want {
+		t.Fatalf("got %v, want %v", citations[3].Authors[1].Surname, want)
+	}
+	if len(citations[3].Editors) != 3 {
+		t.Fatalf("editor count mismatch, got %v", len(citations[3].Editors))
+	}
+	if want := "Fitzmaurice"; citations[3].Editors[0].Surname != want {
+		t.Fatalf("got %v, want %v", citations[3].Editors[0].Surname, want)
+	}
+	// TODO: multiple persName under a single <editor>
+	// (https://github.com/kermitt2/grobid/issues/845)
+	if want := "Brus"; citations[3].Editors[1].Surname != want {
+		t.Fatalf("got %v, want %v", citations[3].Editors[1].Surname, want)
+	}
+	if want := "Sleytr"; citations[4].Authors[0].Surname != want {
+		t.Fatalf("got %v, want %v", citations[4].Authors[0].Surname, want)
+	}
+	if want := "B"; citations[4].Authors[0].MiddleName != want {
+		t.Fatalf("got %v, want %v", citations[4].Authors[0].MiddleName, want)
+	}
+	if want := "Global Hunger Index: The Challenge of Hidden Hunger"; citations[7].Title != want {
+		t.Fatalf("got %v, want %v", citations[7].Title, want)
+	}
+	if want := "10.1093/eurheartj/ehi890"; citations[10].DOI != want {
+		t.Fatalf("got %v, want %v", citations[10].Title, want)
+	}
+	if want := ""; citations[10].URL != want {
+		t.Fatalf("got %v, want %v", citations[10].URL, want)
+	}
+	if want := "Devices, Measurements and Properties"; citations[11].Title != want {
+		t.Fatalf("got %v, want %v", citations[11].Title, want)
+	}
+	if want := "Handbook of Optics"; citations[11].SeriesTitle != want {
+		t.Fatalf("got %v, want %v", citations[11].SeriesTitle, want)
+	}
+	if want := "McGRAW-HILL"; citations[11].Publisher != want {
+		t.Fatalf("got %v, want %v", citations[11].Publisher, want)
+	}
+	if want := `Implications of abandoned shoreline features above Glacial Lake Duluth levels along the north shore of the Superior Basin in the vicinity of the Brule River`; citations[12].Title != want {
+		t.Fatalf("got %v, want %v", citations[12].Title, want)
+	}
+	if want := `Paper presented at the 13th Biennial Meeting of the American Quaternary Association`; citations[12].BookTitle != want {
+		t.Fatalf("got %v, want %v", citations[12].BookTitle, want)
+	}
+	if want := `University of Minnesota`; citations[12].Institution != want {
+		t.Fatalf("got %v, want %v", citations[12].Institution, want)
+	}
+}
+
 func TestExampleGrobidTei(t *testing.T) {
 	f, err := os.Open("../testdata/document/example.tei.xml")
 	if err != nil {
@@ -71,7 +186,6 @@ func TestExampleGrobidTei(t *testing.T) {
 	if ref.Unstructured != want {
 		t.Fatalf("got %v, want %v", ref.Unstructured, want)
 	}
-
 }
 
 func TestInvalidXML(t *testing.T) {

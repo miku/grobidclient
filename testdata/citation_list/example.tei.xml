@@ -1,0 +1,358 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" 
+ xmlns:mml="http://www.w3.org/1998/Math/MathML">
+	<teiHeader/>
+	<text>
+		<front/>
+		<body/>
+		<back>
+			<div>
+				<listBibl>
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">E-commerce: the challenge for UK SMEs in the twenty-first century</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Quayle</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">International Journal of Operations and Production Management</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="issue">10</biblScope>
+			<biblScope unit="page" from="1148" to="1161" />
+			<date type="published" when="2002" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Evolution, challenges and path forward for low temperature combustion engines</title>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">K</forename><surname>Agarwal</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">P</forename><surname>Singh</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">K</forename><surname>Maurya</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Progress in Energy and Combustion Science</title>
+		<imprint>
+			<biblScope unit="volume">61</biblScope>
+			<biblScope unit="page" from="1" to="56" />
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Thrombotic complications of central venous cath- eters in cancer patients</title>
+		<author>
+			<persName><forename type="first">D</forename><forename type="middle">J</forename><surname>Kutter</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Oncologist</title>
+		<imprint>
+			<biblScope unit="volume">9</biblScope>
+			<biblScope unit="page" from="207" to="216" />
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<monogr>
+		<author>
+			<persName><forename type="first">K</forename><surname>Uhlířová</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Drumbl</surname></persName>
+		</author>
+		<title level="m">Actors and Law Making in International Environmental Law</title>
+				<editor>
+			<persName><forename type="first">M</forename><surname>Fitzmaurice</surname></persName>
+			<persName><forename type="first">M</forename><surname>Brus</surname></persName>
+			<persName><forename type="first">P</forename><surname>Merkouris</surname></persName>
+		</editor>
+		<meeting><address><addrLine>Cheltenham</addrLine></address></meeting>
+		<imprint>
+			<publisher>Edward Elgar Publishing</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="volume">50</biblScope>
+		</imprint>
+	</monogr>
+	<note>The Research Handbook on International Environmental Law</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">Self as- sembly protein systems: Microbial S-layers</title>
+		<author>
+			<persName><forename type="first">U</forename><forename type="middle">B</forename><surname>Sleytr</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Sára</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Pum</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Schuster</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Messner</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Schäffer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Biopolymers</title>
+		<editor>A. Steinbüchel and S. Fahnestock</editor>
+		<imprint>
+			<biblScope unit="volume">7</biblScope>
+			<biblScope unit="page" from="285" to="338" />
+			<date type="published" when="2003" />
+			<publisher>Wiley-VCH</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Self-illuminating quantum dot conjugates for in vivo imaging</title>
+		<author>
+			<persName><forename type="first">M-K</forename><surname>So</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">M</forename><surname>Loening</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">S</forename><surname>Gambhir</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Rao</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Nat Biotech</title>
+		<imprint>
+			<biblScope unit="volume">24</biblScope>
+			<biblScope unit="page" from="339" to="343" />
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Informed conditioning on clinical covariates increases power in case-control association studies</title>
+		<author>
+			<persName><forename type="first">N</forename><surname>Zaitlen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Lindström</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Pasaniuc</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Cornelis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Genovese</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Pollack</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><forename type="middle">I</forename><surname>Freedman</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">PLoS genetics</title>
+		<imprint>
+			<biblScope unit="volume">8</biblScope>
+			<biblScope unit="issue">11</biblScope>
+			<biblScope unit="page">e1003032</biblScope>
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<monogr>
+		<author>
+			<persName><forename type="first">K</forename><surname>Von Grebmer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Saltzman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">E</forename><surname>Birol</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Wiesmann</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><surname>Prasai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Yin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Yohannes</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Menon</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Thompson</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Sonntag</surname></persName>
+		</author>
+		<title level="m">Global Hunger Index: The Challenge of Hidden Hunger</title>
+				<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Isolation and characterization of serum-resistant strains ofPseudomonas aeruginosa derived from serum-sensitive parental strains</title>
+		<author>
+			<persName><forename type="first">N</forename><forename type="middle">L</forename><surname>Schiller</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><forename type="middle">R</forename><surname>Hackley</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Morrison</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Curr Microbiol</title>
+		<imprint>
+			<biblScope unit="volume">10</biblScope>
+			<biblScope unit="page" from="185" to="190" />
+			<date type="published" when="1984" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Importin 7 and importin alpha/importin beta are nuclear import receptors for the glucocorticoid receptor</title>
+		<author>
+			<persName><forename type="first">N</forename><forename type="middle">D</forename><surname>Freedman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">K</forename><forename type="middle">R</forename><surname>Yamamoto</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Mol Biol Cell</title>
+		<imprint>
+			<biblScope unit="volume">15</biblScope>
+			<biblScope unit="page" from="2276" to="2286" />
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+        <analytic>
+                <title level="a" type="main">Heart failure, chronic diuretic use, and increase in mortality and hospitalization: an observational study using propensity score methods</title>
+                <author>
+                        <persName><forename type="first">A</forename><surname>Ahmed</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">A</forename><surname>Husain</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">T</forename><forename type="middle">E</forename><surname>Love</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">G</forename><surname>Gambassi</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">L</forename><forename type="middle">J</forename><surname>Dell’italia</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">G</forename><forename type="middle">S</forename><surname>Francis</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">M</forename><surname>Gheorghiade</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">R</forename><forename type="middle">M</forename><surname>Allman</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">S</forename><surname>Meleth</surname></persName>
+                </author>
+                <author>
+                        <persName><forename type="first">R</forename><forename type="middle">C</forename><surname>Bourge</surname></persName>
+                </author>
+                <idno type="DOI">10.1093/eurheartj/ehi890</idno>
+                <ptr target="https://doi.org/10.1093/eurheartj/ehi890" />
+        </analytic>
+        <monogr>
+                <title level="j">Eur Heart J</title>
+                <imprint>
+                        <biblScope unit="volume">27</biblScope>
+                        <biblScope unit="issue">12</biblScope>
+                        <biblScope unit="page" from="1431" to="1439" />
+                        <date type="published" when="2006" />
+                </imprint>
+        </monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+        <analytic>
+                <author>
+                        <persName><forename type="first">Michael</forename><surname>Bass</surname></persName>
+                </author>
+        </analytic>
+        <monogr>
+                <title level="m">Devices, Measurements and Properties</title>
+                <title level="s">Handbook of Optics</title>
+                <imprint>
+                        <publisher>McGRAW-HILL</publisher>
+                        <date type="published" when="1995" />
+                        <biblScope unit="volume">2</biblScope>
+                </imprint>
+        </monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+        <analytic>
+                <title level="a" type="main">Implications of abandoned shoreline features above Glacial Lake Duluth levels along the north shore of the Superior Basin in the vicinity of the Brule River</title>
+        </analytic>
+        <monogr>
+                <title level="m">Paper presented at the 13th Biennial Meeting of the American Quaternary Association</title>
+                                <meeting><address><addrLine>Minneapolis</addrLine></address></meeting>
+                <imprint>
+                        <date type="published" when="1994-06" />
+                </imprint>
+                <respStmt>
+                        <orgName>University of Minnesota</orgName>
+                </respStmt>
+        </monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
+
