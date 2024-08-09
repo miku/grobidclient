@@ -7,6 +7,12 @@ Go client library and CLI for [grobid](https://github.com/kermitt2/grobid).
 $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
 ```
 
+This library includes functions:
+
+* to run parsing on a single PDF file
+* to run parsing recursively on a directory of files
+* to convert TEI XML to JSON, akin to [grobid-tei-xml](https://pypi.org/project/grobid-tei-xml/) (Python, cf. [#41](https://github.com/kermitt2/grobid_client_python/issues/41))
+
 ![](static/670258.gif)
 
 ## Notes on server setup
