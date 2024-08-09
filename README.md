@@ -39,7 +39,7 @@ grobidcli | valid service (-s) names:
   -T duration
         client timeout (default 1m0s)
   -W string
-        path to WARC file to extract PDFs and parse them (experimental)
+        path to WARC file to extract PDFs and parse them (exp)
   -c string
         path to config file, often config.json
   -cc
