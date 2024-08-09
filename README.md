@@ -13,8 +13,6 @@ This library includes functions:
 * to run parsing recursively on a directory of files
 * to convert TEI XML to JSON, akin to [grobid-tei-xml](https://pypi.org/project/grobid-tei-xml/) (Python, cf. [#41](https://github.com/kermitt2/grobid_client_python/issues/41))
 
-![](static/670258.gif)
-
 ## Notes on server setup
 
 * [Production Grobid Server Configuration](https://github.com/kermitt2/grobid/issues/443#issuecomment-505208132)
@@ -70,8 +68,6 @@ grobidcli | valid service (-s) names:
         a valid service name (default "processFulltextDocument")
   -ss
         segment sentences
-  -tei
-        add pdf coordinates
   -v    be verbose
   -version
         show version
