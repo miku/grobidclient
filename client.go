@@ -110,7 +110,7 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 // Result wraps a server response, not necessarily successful.
 type Result struct {
 	Filename       string
-	SHA1           string
+	SHA1Hex        string
 	StatusCode     int
 	Body           []byte
 	Err            error
@@ -135,7 +135,7 @@ type Doer interface {
 // New creates a new Grobid client with a recommended, resilient HTTP client.
 func New(server string) *Grobid {
 	hc := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 60 * time.Second,
 	}
 	client := pester.NewExtendedClient(hc)
 	client.MaxRetries = 3
@@ -210,10 +210,10 @@ type ResultWriterFunc func(*Result, *Options) error
 func DebugResultWriter(result *Result, _ *Options) error {
 	if result.Err != nil {
 		log.Printf("[%d][%s] %s [%v][%v]",
-			result.StatusCode, result.SHA1, result.Filename, result.ProcessingTime, result.Err)
+			result.StatusCode, result.SHA1Hex, result.Filename, result.ProcessingTime, result.Err)
 	} else {
 		log.Printf("[%d][%s] %s [%v][]",
-			result.StatusCode, result.SHA1, result.Filename, result.ProcessingTime)
+			result.StatusCode, result.SHA1Hex, result.Filename, result.ProcessingTime)
 	}
 	return result.Err
 }
@@ -244,7 +244,7 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 		return err
 	}
 	if opts.CreateHashSymlinks {
-		link := path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1, DefaultExt))
+		link := path.Join(path.Dir(dst), fmt.Sprintf("%s.%s", result.SHA1Hex, DefaultExt))
 		if err := os.Symlink(path.Base(dst), link); err != nil {
 			return err
 		}
@@ -454,7 +454,7 @@ func (g *Grobid) ProcessPDFContext(ctx context.Context, filename, service string
 	result := &Result{
 		Filename:       filename,
 		Body:           b,
-		SHA1:           fmt.Sprintf("%x", h.Sum(nil)),
+		SHA1Hex:        fmt.Sprintf("%x", h.Sum(nil)),
 		StatusCode:     resp.StatusCode,
 		ProcessingTime: time.Since(started),
 	}
