@@ -27,7 +27,7 @@ import (
 )
 
 // Version of grobidclient.
-var Version = "0.2.1"
+var Version = "0.2.2"
 
 // ErrInvalidService, if the service name is not known.
 var ErrInvalidService = errors.New("invalid service")
