@@ -61,6 +61,7 @@ grobidcli | valid service (-s) names:
         include raw affiliations
   -irc
         include raw citations
+  -j    output json for a single file
   -n int
         number of concurrent workers (default 12)
   -r int
@@ -95,7 +96,7 @@ $ grobidcli -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf | xmllint --fo
 Process a single PDF and convert to JSON:
 
 ```json
-
+$ grobidcli -j -S k9:8070 -f testdata/pdf/1906.02444.pdf | jq .
 {
   "grobid_version": "0.8.0",
   "grobid_ts": "2024-08-27T16:56+0000",
