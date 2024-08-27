@@ -221,9 +221,9 @@ tool](https://github.com/miku/grobidclient/blob/main/cmd/grobidcli/main.go).
 ```go
 import (
     ...
-	"fmt"
+    "fmt"
     "json"
-	"log"
+    "log"
     ...
 
 	"github.com/miku/grobidclient"
