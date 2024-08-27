@@ -23,3 +23,10 @@ go.work
 go.work.sum
 /grobidcli
 /cmd/scratch
+
+testdata/pdf/062RoisinAronAmericanNaturalist03.grobid.tei.xml
+testdata/pdf/1906.02444.grobid.tei.xml
+testdata/pdf/1906.11632.grobid.tei.xml
+testdata/pdf/1906.11964.grobid.tei.xml
+testdata/pdf/1906.12195.grobid.tei.xml
+testdata/pdf/62-Article Text-140-1-10-20190621.grobid.tei.xml
