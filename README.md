@@ -236,7 +236,13 @@ import (
 		ConsolidateCitations:   *consolidateCitations,
 		IncludeRawCitations:    *includeRawCitations,
 		IncluseRawAffiliations: *includeRawAffiliations,
-		TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
+		TEICoordinates:         []string{
+            "ref",
+            "figure",
+            "persName",
+            "formula",
+            "biblStruct",
+        },
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,
@@ -245,13 +251,15 @@ import (
 	}
 	switch {
 	case *inputFile != "":
-		result, err := grobid.ProcessPDF(*inputFile, *serviceName, opts)
+		result, err := grobid.ProcessPDF(*inputFile,
+            *serviceName, opts)
 		if err != nil {
 			log.Fatal(err)
 		}
 		switch {
 		case *jsonFormat:
-			doc, err := tei.ParseDocument(bytes.NewReader(result.Body))
+			doc, err := tei.ParseDocument(
+                bytes.NewReader(result.Body))
 			if err != nil {
 				log.Fatal(err)
 			}
