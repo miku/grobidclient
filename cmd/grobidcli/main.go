@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/miku/grobidclient"
@@ -114,6 +115,9 @@ func main() {
 	if *showVersion {
 		fmt.Println(grobidclient.Version)
 		os.Exit(0)
+	}
+	if *server != "" && !strings.HasPrefix(*server, "http") {
+		*server = "http://" + *server
 	}
 	if !grobidclient.IsValidService(*serviceName) {
 		log.Fatal("invalid service name")

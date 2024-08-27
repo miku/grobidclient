@@ -181,10 +181,11 @@ func (g *Grobid) Ping() error {
 
 // Pingmoji returns an emoji rendering of a ping result.
 func (g *Grobid) Pingmoji() string {
-	if g.Ping() == nil {
+	if err := g.Ping(); err == nil {
 		return "✅"
+	} else {
+		return fmt.Sprintf("⛔ (%v)", err)
 	}
-	return "⛔"
 }
 
 // withoutExt returns the given file or path without the extension.
