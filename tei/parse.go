@@ -1,4 +1,11 @@
+// Package tei implements a few GROBID TEI-XML to JSON helpers. This has been
+// done previously in various places, mostly in Python:
+//
+// A) https://pypi.org/project/grobid-tei-xml/ "Python parser and transforms for GROBID-flavor TEI-XML"
+// B) ALLENAI, S2ORC: https://is.gd/8INu3O,
 // https://github.com/allenai/s2orc-doc2json/blob/71c022ed4bed3ffc71d22c2ac5cdbc133ad04e3c/doc2json/grobid2json/tei_to_json.py#L691
+//
+// This library is modeled very closely along the lines of grobid-tei-xml.
 package tei
 
 import (
@@ -27,7 +34,6 @@ var ErrInvalidDocument = errors.New("invalid document")
 // namespace.
 func ParseCitationList(xmlText string) []*GrobidBiblio {
 	xmlText = strings.Replace(xmlText, `xmlns="http://www.tei-c.org/ns/1.0"`, ``, 1)
-
 	tree := etree.NewDocument()
 	tree.ReadFromString(xmlText)
 	root := tree.Root()
@@ -67,6 +73,7 @@ func ParseCitations(xmlText string) []*GrobidBiblio {
 	return ParseCitationList(xmlText)
 }
 
+// ParseDocument reads XML data from a reader and turns it into a GrobidDocument.
 func ParseDocument(r io.Reader) (*GrobidDocument, error) {
 	tree := etree.NewDocument()
 	_, err := tree.ReadFrom(r)
@@ -127,6 +134,7 @@ func ParseDocument(r io.Reader) (*GrobidDocument, error) {
 	return doc, nil
 }
 
+// parseAffiliation parses an element into a GrobidAffiliation.
 func parseAffiliation(elem *etree.Element) *GrobidAffiliation {
 	ga := &GrobidAffiliation{}
 	for _, e := range elem.FindElements(`./orgName`) {
@@ -221,6 +229,7 @@ func parsePersName(elem *etree.Element) *GrobidAuthor {
 	return ga
 }
 
+// parseBiblio parses bibliographic elements into a GrobidBiblio struct.
 func parseBiblio(elem *etree.Element) *GrobidBiblio {
 	var authors []*GrobidAuthor
 	for _, ela := range elem.FindElements(`.//author`) {
@@ -314,6 +323,7 @@ func parseBiblio(elem *etree.Element) *GrobidBiblio {
 	return biblio
 }
 
+// GrobidDocument groups a response from the GROBID API.
 type GrobidDocument struct {
 	GrobidVersion   string          `json:"grobid_version,omitempty"`
 	GrobidTs        string          `json:"grobid_ts,omitempty"`
@@ -327,6 +337,7 @@ type GrobidDocument struct {
 	Annex           string          `json:"annex,omitempty"`
 }
 
+// RemoveEncumbered removes potentially sensible information.
 func (g *GrobidDocument) RemoveEncumbered() {
 	g.Abstract = ""
 	g.Body = ""
@@ -334,6 +345,7 @@ func (g *GrobidDocument) RemoveEncumbered() {
 	g.Annex = ""
 }
 
+// GrobidAddress contains a parsed address.
 type GrobidAddress struct {
 	AddrLine   string `json:"line,omitempty"`
 	PostCode   string `json:"postcode,omitempty"`
@@ -341,6 +353,7 @@ type GrobidAddress struct {
 	Country    string `json:"country,omitempty"`
 }
 
+// GrobidAffiliation contains a parsed affiliation.
 type GrobidAffiliation struct {
 	Institution string         `json:"institution,omitempty"`
 	Department  string         `json:"department,omitempty"`
@@ -348,10 +361,12 @@ type GrobidAffiliation struct {
 	Address     *GrobidAddress `json:"address,omitempty"`
 }
 
+// isEmpty is return true, if we do not know anything about an affiliation.
 func (g *GrobidAffiliation) isEmpty() bool {
 	return g.Institution == "" && g.Department == "" && g.Laboratory == "" && g.Address == nil
 }
 
+// GrobidAuthor contains parsed author information.
 type GrobidAuthor struct {
 	FullName    string             `json:"full_name,omitempty"`
 	GivenName   string             `json:"given_name,omitempty"`
@@ -362,6 +377,7 @@ type GrobidAuthor struct {
 	Affiliation *GrobidAffiliation `json:"aff,omitempty"`
 }
 
+// GrobidBiblio contains the parsed metadata.
 type GrobidBiblio struct {
 	Authors       []*GrobidAuthor `json:"authors,omitempty"`
 	Index         int             `json:"index,omitempty"`
@@ -394,6 +410,7 @@ type GrobidBiblio struct {
 	URL           string          `json:"url,omitempty"`
 }
 
+// IsEmpty returns true, if information of this datum is too sketchy.
 func (g *GrobidBiblio) IsEmpty() bool {
 	if len(g.Authors) > 0 || len(g.Editors) > 0 {
 		return false
@@ -414,6 +431,7 @@ func (g *GrobidBiblio) IsEmpty() bool {
 	)
 }
 
+// cleanURL does a basic URL cleaning, based on observed issues in data in this domain.
 func cleanURL(u string) string {
 	if len(u) == 0 {
 		return u
@@ -441,7 +459,8 @@ func anyString(vs ...string) bool {
 	return false
 }
 
-// findElementText return the text of a node matched by path or the empty string.
+// findElementText return the text of a node matched by path or the empty
+// string.
 func findElementText(elem *etree.Element, path string) string {
 	if elem == nil {
 		return ""
