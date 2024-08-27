@@ -164,7 +164,7 @@ $ grobidcli -j -S http://localhost:8070 -f testdata/pdf/1906.02444.pdf | jq .
       ],
       "id": "b0",
       "date": "2017",
-      "title": "Real-time vibration-based structural damage detection using one-dimensional convolutional neural networks",
+      "title": "Real-time vibration-based stru...",
       "journal": "J. Sound Vib",
       "volume": "388",
       "pages": "154-170",
