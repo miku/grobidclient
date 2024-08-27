@@ -202,10 +202,10 @@ $ grobidcli -j -S http://localhost:8070 -f testdata/pdf/1906.02444.pdf | jq .
 Process pdf files in a directory in parallel.
 
 ```shell
-$ grobidcli -d fixtures
-2024/07/30 20:48:35 scanning fixtures/
-2024/07/30 20:48:37 got result [200]: fixtures/62-Article Text-140-1-10-20190621.pdf
-2024/07/30 20:48:39 got result [200]: fixtures/062RoisinAronAmericanNaturalist03.pdf
+$ grobidcli -d testdata/pdf
+2024/07/30 20:48:35 scanning testdata/pdf/
+2024/07/30 20:48:37 got result [200]: testdata/pdf/62-Article Text-140-1-10-20190621.pdf
+2024/07/30 20:48:39 got result [200]: testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
 ```
 
 By default, for each PDF file a separate file is written to a file with the
