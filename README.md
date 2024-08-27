@@ -1,7 +1,7 @@
 # grobidclient
 
-Go client library and CLI for [grobid](https://github.com/kermitt2/grobid).
-**WARNING: limited functionality.** To install the CLI:
+Go client library and CLI for [grobid](https://github.com/kermitt2/grobid).  To
+install the CLI:
 
 ```
 $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
@@ -11,7 +11,7 @@ This library includes functions:
 
 * to run parsing on a single PDF file
 * to run parsing recursively on a directory of files
-* to convert TEI XML to JSON, akin to [grobid-tei-xml](https://pypi.org/project/grobid-tei-xml/) (Python, cf. [#41](https://github.com/kermitt2/grobid_client_python/issues/41))
+* to convert TEI XML to a JSON format, akin to [grobid-tei-xml](https://pypi.org/project/grobid-tei-xml/) (Python, cf. [#41](https://github.com/kermitt2/grobid_client_python/issues/41))
 
 ## Notes on server setup
 
@@ -39,7 +39,7 @@ grobidcli | valid service (-s) names:
   -T duration
         client timeout (default 1m0s)
   -W string
-        path to WARC file to extract PDFs and parse them (exp)
+        path to WARC file to extract PDFs and parse them (experimental)
   -c string
         path to config file, often config.json
   -cc
