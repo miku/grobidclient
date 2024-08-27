@@ -76,7 +76,7 @@ grobidcli | valid service (-s) names:
 Process a single PDF.
 
 ```xml
-$ grobidcli -f fixtures/062RoisinAronAmericanNaturalist03.pdf | xmllint --format - | head -10
+$ grobidcli -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf | xmllint --format - | head -10
 <?xml version="1.0" encoding="UTF-8"?>
 <TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XML...
         <teiHeader xml:lang="en">
