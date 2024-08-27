@@ -14,11 +14,10 @@ This library includes functions:
 * to run parsing recursively on files in a directory
 * to convert TEI XML to a JSON format, akin to [grobid-tei-xml](https://pypi.org/project/grobid-tei-xml/) (Python, cf. [#41](https://github.com/kermitt2/grobid_client_python/issues/41))
 
-## Notes on server setup
-
-* [Production Grobid Server Configuration](https://github.com/kermitt2/grobid/issues/443#issuecomment-505208132)
-
 ## Usage
+
+The CLI allows to access the various services, receive parsed XML or JSON
+results or to process a complete directory of PDF files (in parallel).
 
 ```shell
 $ grobidcli -h
@@ -191,6 +190,9 @@ By default, for each PDF file a separate file is written to a file with the
 `grobid.tei.xml` extension.
 
 
+## Notes on server setup
+
+* [Production Grobid Server Configuration](https://github.com/kermitt2/grobid/issues/443#issuecomment-505208132)
 
 ## TODO and IDEAS
 
