@@ -30,7 +30,7 @@ var (
 	configFile         = flag.String("c", "", "path to config file, often config.json")
 	numWorkers         = flag.Int("n", recommendedNumWorkers(), "number of concurrent workers")
 	doPing             = flag.Bool("P", false, "do a ping, then exit")
-	debug              = flag.Bool("debug", false, "use debug result writer, does not create any files")
+	debug              = flag.Bool("debug", false, "use debug result writer, does not create any output files")
 	warcFile           = flag.String("W", "", "path to WARC file to extract PDFs and parse them (experimental)")
 	verbose            = flag.Bool("v", false, "be verbose")
 	maxRetries         = flag.Int("r", 10, "max retries")
@@ -38,13 +38,13 @@ var (
 	showVersion        = flag.Bool("version", false, "show version")
 	jsonFormat         = flag.Bool("j", false, "output json for a single file")
 	// Flags passed to grobid API.
-	generateIDs            = flag.Bool("gi", false, "generate ids")
-	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
-	consolidateHeader      = flag.Bool("ch", false, "consolidate header")
-	includeRawCitations    = flag.Bool("irc", false, "include raw citations")
-	includeRawAffiliations = flag.Bool("ira", false, "include raw affiliations")
-	forceReprocess         = flag.Bool("force", false, "force reprocess")
-	segmentSentences       = flag.Bool("ss", false, "segment sentences")
+	generateIDs            = flag.Bool("g-gi", false, "grobid: generate ids")
+	consolidateCitations   = flag.Bool("g-cc", false, "grobid: consolidate citations")
+	consolidateHeader      = flag.Bool("g-ch", false, "grobid: consolidate header")
+	includeRawCitations    = flag.Bool("g-irc", false, "grobid: include raw citations")
+	includeRawAffiliations = flag.Bool("g-ira", false, "grobid: include raw affiliations")
+	forceReprocess         = flag.Bool("g-force", false, "grobid: force reprocess")
+	segmentSentences       = flag.Bool("g-ss", false, "grobid: segment sentences")
 	// TODO: add teicoordniates
 )
 
@@ -106,13 +106,38 @@ var DefaultConfig = &Config{
 
 func main() {
 	flag.Usage = func() {
+		fmt.Fprintln(os.Stderr, `
+░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
+▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
+▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
+█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
+██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
+`)
 		fmt.Fprintln(os.Stderr, "grobidcli | valid service (-s) names:")
 		fmt.Fprintln(os.Stderr)
 		for _, s := range grobidclient.ValidServices {
 			fmt.Fprintf(os.Stderr, "  %s\n", s)
 		}
 		fmt.Fprintln(os.Stderr)
+		fmt.Fprintf(os.Stderr, `Note: options passed to grobid API are prefixed with "g-", like "g-ira"`)
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintln(os.Stderr)
 		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintln(os.Stderr, `Examples:
+
+Process a single PDF file and get back TEI-XML
+
+  $ grobidcli -S localhost:8070 -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
+
+Process a single PDF file and get back JSON
+
+  $ grobidcli -j -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
+
+Process a directory of PDF files
+
+  $ grobidcli -d testdata/pdf
+`)
 	}
 	flag.Parse()
 	if *showVersion {

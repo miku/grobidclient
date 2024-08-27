@@ -20,7 +20,13 @@ The CLI allows to access the various services, receive parsed XML or JSON
 results or to process a complete directory of PDF files (in parallel).
 
 ```shell
-$ grobidcli -h
+
+░░      ░░░       ░░░░      ░░░       ░░░        ░░       ░░░░      ░░░  ░░░░░░░░        ░
+▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒▒▒▒  ▒▒▒▒
+▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
+█  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
+██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
+
 grobidcli | valid service (-s) names:
 
   processFulltextDocument
@@ -30,48 +36,64 @@ grobidcli | valid service (-s) names:
   processCitationPatentST36
   processCitationPatentPDF
 
-  -H    use sha1 of file contents as the filename
+Note: options passed to grobid API are prefixed with "g-", like "g-ira"
+
+  -H	use sha1 of file contents as the filename
   -O string
-        output directory to write parsed files to
-  -P    do a ping, then exit
+    	output directory to write parsed files to
+  -P	do a ping, then exit
   -S string
-        server URL (default "http://localhost:8070")
+    	server URL (default "http://localhost:8070")
   -T duration
-        client timeout (default 1m0s)
+    	client timeout (default 1m0s)
   -W string
-        path to WARC file to extract PDFs and parse them (exp)
+    	path to WARC file to extract PDFs and parse them (experimental)
   -c string
-        path to config file, often config.json
-  -cc
-        consolidate citations
-  -ch
-        consolidate header
+    	path to config file, often config.json
   -d string
-        input directory to scan for PDF, txt, or XML files
+    	input directory to scan for PDF, txt, or XML files
   -debug
-        use debug result writer, does not create any files
+    	use debug result writer, does not create any output files
   -f string
-        single input file to process
-  -force
-        force reprocess
-  -gi
-        generate ids
-  -ira
-        include raw affiliations
-  -irc
-        include raw citations
-  -j    output json for a single file
+    	single input file to process
+  -g-cc
+    	grobid: consolidate citations
+  -g-ch
+    	grobid: consolidate header
+  -g-force
+    	grobid: force reprocess
+  -g-gi
+    	grobid: generate ids
+  -g-ira
+    	grobid: include raw affiliations
+  -g-irc
+    	grobid: include raw citations
+  -g-ss
+    	grobid: segment sentences
+  -j	output json for a single file
   -n int
-        number of concurrent workers (default 12)
+    	number of concurrent workers (default 12)
   -r int
-        max retries (default 10)
+    	max retries (default 10)
   -s string
-        a valid service name (default "processFulltextDocument")
-  -ss
-        segment sentences
-  -v    be verbose
+    	a valid service name (default "processFulltextDocument")
+  -v	be verbose
   -version
-        show version
+    	show version
+
+Examples:
+
+Process a single PDF file and get back TEI-XML
+
+  $ grobidcli -S localhost:8070 -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
+
+Process a single PDF file and get back JSON
+
+  $ grobidcli -j -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
+
+Process a directory of PDF files
+
+  $ grobidcli -d fixtures
 ```
 
 Process a single PDF.
