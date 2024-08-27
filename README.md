@@ -211,6 +211,61 @@ $ grobidcli -d fixtures
 By default, for each PDF file a separate file is written to a file with the
 `grobid.tei.xml` extension.
 
+## Example library usage
+
+Package documentation on
+[pkg.go.dev](https://pkg.go.dev/github.com/miku/grobidclient). Example takes
+from the [grobidcli
+tool](https://github.com/miku/grobidclient/blob/main/cmd/grobidcli/main.go).
+
+```go
+import (
+    ...
+	"fmt"
+    "json"
+	"log"
+    ...
+
+	"github.com/miku/grobidclient"
+	"github.com/miku/grobidclient/tei"
+)
+    ...
+	opts := &grobidclient.Options{
+		GenerateIDs:            *generateIDs,
+		ConsolidateHeader:      *consolidateHeader,
+		ConsolidateCitations:   *consolidateCitations,
+		IncludeRawCitations:    *includeRawCitations,
+		IncluseRawAffiliations: *includeRawAffiliations,
+		TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
+		SegmentSentences:       *segmentSentences,
+		Force:                  *forceReprocess,
+		Verbose:                *verbose,
+		OutputDir:              *outputDir,
+		CreateHashSymlinks:     *createHashSymlinks,
+	}
+	switch {
+	case *inputFile != "":
+		result, err := grobid.ProcessPDF(*inputFile, *serviceName, opts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		switch {
+		case *jsonFormat:
+			doc, err := tei.ParseDocument(bytes.NewReader(result.Body))
+			if err != nil {
+				log.Fatal(err)
+			}
+			enc := json.NewEncoder(os.Stdout)
+			if err := enc.Encode(doc); err != nil {
+				log.Fatal(err)
+			}
+		case result.StatusCode == 200:
+			fmt.Println(result.StringBody())
+		default:
+			log.Fatal(result)
+		}
+    ...
+```
 
 ## Notes on server setup
 
