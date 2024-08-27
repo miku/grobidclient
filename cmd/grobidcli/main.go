@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/miku/grobidclient"
+	"github.com/miku/grobidclient/tei"
 	"github.com/sethgrid/pester"
 	"github.com/slyrz/warc"
 )
@@ -34,6 +36,7 @@ var (
 	maxRetries         = flag.Int("r", 10, "max retries")
 	timeout            = flag.Duration("T", 60*time.Second, "client timeout")
 	showVersion        = flag.Bool("version", false, "show version")
+	jsonFormat         = flag.Bool("j", false, "output json for a single file")
 	// Flags passed to grobid API.
 	generateIDs            = flag.Bool("gi", false, "generate ids")
 	consolidateCitations   = flag.Bool("cc", false, "consolidate citations")
@@ -177,9 +180,19 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if result.StatusCode == 200 {
+		switch {
+		case *jsonFormat:
+			doc, err := tei.ParseDocument(bytes.NewReader(result.Body))
+			if err != nil {
+				log.Fatal(err)
+			}
+			enc := json.NewEncoder(os.Stdout)
+			if err := enc.Encode(doc); err != nil {
+				log.Fatal(err)
+			}
+		case result.StatusCode == 200:
 			fmt.Println(result.StringBody())
-		} else {
+		default:
 			log.Fatal(result)
 		}
 	case *inputDir != "":

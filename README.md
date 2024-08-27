@@ -92,6 +92,91 @@ $ grobidcli -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf | xmllint --fo
 ...
 ```
 
+Process a single PDF and convert to JSON:
+
+```json
+
+{
+  "grobid_version": "0.8.0",
+  "grobid_ts": "2024-08-27T16:56+0000",
+  "header": {
+    "authors": [
+      {
+        "full_name": "Davor Kolar",
+        "given_name": "Davor",
+        "surname": "Kolar",
+        "email": "dkolar@fsb.hr"
+      },
+      {
+        "full_name": "Dragutin Lisjak",
+        "given_name": "Dragutin",
+        "surname": "Lisjak",
+        "email": "dlisjak@fsb.hr"
+      },
+      {
+        "full_name": "Michał Paj Ąk",
+        "given_name": "Michał",
+        "surname": "Paj Ąk"
+      },
+      {
+        "full_name": "Danijel Pavkovic",
+        "given_name": "Danijel",
+        "surname": "Pavkovic",
+        "email": "dpavkovic@fsb.hr"
+      }
+    ],
+    "date": "2019-06-06",
+    "doi": "10.1177/ToBeAssigned",
+    "arxiv_id": "1906.02444v1[cs.LG]"
+  },
+  "pdfmd5": "E04A100BC6A02EFBF791566D6CB62BC9",
+  "lang": "en",
+  "citations": [
+    {
+      "authors": [
+        {
+          "full_name": "O Abdeljaber",
+          "given_name": "O",
+          "surname": "Abdeljaber"
+        },
+        {
+          "full_name": "O Avci",
+          "given_name": "O",
+          "surname": "Avci"
+        },
+        {
+          "full_name": "S Kiranyaz",
+          "given_name": "S",
+          "surname": "Kiranyaz"
+        },
+        {
+          "full_name": "M Gabbouj",
+          "given_name": "M",
+          "surname": "Gabbouj"
+        },
+        {
+          "full_name": "D J Inman",
+          "given_name": "D",
+          "middle_name": "J",
+          "surname": "Inman"
+        }
+      ],
+      "id": "b0",
+      "date": "2017",
+      "title": "Real-time vibration-based structural damage detection using one-dimensional convolutional neural networks",
+      "journal": "J. Sound Vib",
+      "volume": "388",
+      "pages": "154-170",
+      "first_page": "154",
+      "last_page": "170"
+    },
+    ...
+  ],
+  "abstract": "Recent trends focusing on Industry 4.0 conce...",
+  "body": "Introduction Rotating machines in general consis..."
+}
+```
+
 Process pdf files in a directory in parallel.
 
 ```shell
@@ -103,6 +188,8 @@ $ grobidcli -d fixtures
 
 By default, for each PDF file a separate file is written to a file with the
 `grobid.tei.xml` extension.
+
+
 
 ## TODO and IDEAS
 
