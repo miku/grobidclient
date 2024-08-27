@@ -180,7 +180,7 @@ func main() {
 		}
 	case *inputDir != "":
 		log.Printf("scanning %s...", *inputDir)
-		var rwf grobidclient.ResultWriterFunc
+		var rwf grobidclient.ResultFunc
 		switch {
 		case *debug:
 			rwf = grobidclient.DebugResultWriter

@@ -56,6 +56,7 @@ func IsValidService(name string) bool {
 	return false
 }
 
+// DefaultOptions to send to GROBID.
 var DefaultOptions = &Options{
 	GenerateIDs:            true,
 	ConsolidateHeader:      true,
@@ -70,14 +71,15 @@ var DefaultOptions = &Options{
 	CreateHashSymlinks:     false,
 }
 
-// Options are grobid API options.
+// Options are grobid API options. Full documentation can be found at
+// https://grobid.readthedocs.io/en/latest/Grobid-service/#grobid-web-services.
 type Options struct {
 	GenerateIDs            bool
 	ConsolidateHeader      bool
 	ConsolidateCitations   bool
 	IncludeRawCitations    bool
 	IncluseRawAffiliations bool
-	TEICoordinates         []string
+	TEICoordinates         []string // https://grobid.readthedocs.io/en/latest/Coordinates-in-PDF/
 	SegmentSentences       bool
 	Force                  bool
 	Verbose                bool
@@ -85,7 +87,7 @@ type Options struct {
 	CreateHashSymlinks     bool
 }
 
-// writeFields writes set flags to a writer. TODO: TEICoordinates?
+// writeFields writes set flags to a writer.
 func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.ConsolidateCitations {
 		w.WriteField("consolidateCitations", "1")
@@ -105,9 +107,13 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.SegmentSentences {
 		w.WriteField("segmentSentences", "1")
 	}
+	for _, v := range opts.TEICoordinates {
+		w.WriteField("teiCoordinates", v)
+	}
 }
 
-// Result wraps a server response, not necessarily successful.
+// Result wraps a server response, not necessarily successful. If processing
+// failed, Err will contain the first error encountered.
 type Result struct {
 	Filename       string
 	SHA1Hex        string
@@ -173,7 +179,7 @@ func (g *Grobid) Ping() error {
 	return nil
 }
 
-// Pingmoji returns an emoji version of ping.
+// Pingmoji returns an emoji rendering of a ping result.
 func (g *Grobid) Pingmoji() string {
 	if g.Ping() == nil {
 		return "✅"
@@ -198,15 +204,18 @@ func outputFilename(filepath string, opts *Options) string {
 
 // isAlreadyProcessed returns true, if the file at a given path has been
 // processed. Note: this does not work with hash based naming as for those the
-// file contents needs to be already hashed.
+// file contents needs to be completely read already. This should be a fast
+// operation.
 func (g *Grobid) isAlreadyProcessed(path string, opts *Options) bool {
 	name := outputFilename(path, opts)
 	_, err := os.Stat(name)
 	return err == nil
 }
 
-type ResultWriterFunc func(*Result, *Options) error
+// ResultFunc is a function invoked on the result of the processing.
+type ResultFunc func(*Result, *Options) error
 
+// DebugResultWriter is a dummy result writer, which only logs the result.
 func DebugResultWriter(result *Result, _ *Options) error {
 	if result.Err != nil {
 		log.Printf("[%d][%s] %s [%v][%v]",
@@ -218,7 +227,9 @@ func DebugResultWriter(result *Result, _ *Options) error {
 	return result.Err
 }
 
-// DefaultResultWriter write out a single file with the result.
+// DefaultResultWriter is a ResultFunc that writes out a single file with the
+// result. It contains handling to write out error results akin to the Python
+// grobid client library.
 func DefaultResultWriter(result *Result, opts *Options) error {
 	if opts == nil {
 		opts = DefaultOptions
@@ -252,11 +263,13 @@ func DefaultResultWriter(result *Result, opts *Options) error {
 	return nil
 }
 
-// ProcessDirRecursive recursively walks a given directory and run parsing on
-// each file. A number of workers can be started and a ResultWriterFunc can be
-// specified, which gets called for each result, e.g. to write debug output to
-// stderr or to write a file with the structured metadata to disk.
-func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf ResultWriterFunc, opts *Options) error {
+// ProcessDirRecursive recursively walks a given directory "dir" and run
+// parsing using "service" on each file. A number of workers can be started and
+// a ResultFunc can be specified, which gets called for each result, e.g. to
+// write debug output to stderr or to write a file with the structured metadata
+// to disk. Options contain options to be passed to GROBID API, using defaults
+// if they are not set.
+func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf ResultFunc, opts *Options) error {
 	var (
 		pathC        = make(chan string)
 		errC         = make(chan error)
@@ -318,7 +331,8 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 		if info.IsDir() {
 			return nil
 		}
-		// The Python client has hardcoded rules for what service and what filetype fit together.
+		// Note: Following the Python client, which has hardcoded rules for
+		// what service and what filetype fit together.
 		switch {
 		case service == "processFulltextDocument" && isPDF(path):
 			if opts.Verbose {
@@ -360,13 +374,11 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 
 // isPDF returns true, if the given file is likely a PDF.
 func isPDF(filename string) bool {
-	// TODO: could also do some content type snooping.
 	mtype, err := mimetype.DetectFile(filename)
 	if err != nil {
 		return strings.HasSuffix(strings.ToLower(filename), ".pdf")
-	} else {
-		return mtype.Is("application/pdf")
 	}
+	return mtype.Is("application/pdf")
 }
 
 // isXML returns true, if the filename is likely an XML file.
