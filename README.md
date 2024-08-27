@@ -40,7 +40,7 @@ grobidcli | valid service (-s) names:
   -T duration
         client timeout (default 1m0s)
   -W string
-        path to WARC file to extract PDFs and parse them (experimental)
+        path to WARC file to extract PDFs and parse them (exp)
   -c string
         path to config file, often config.json
   -cc
@@ -96,7 +96,7 @@ $ grobidcli -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf | xmllint --fo
 Process a single PDF and convert to JSON:
 
 ```json
-$ grobidcli -j -S k9:8070 -f testdata/pdf/1906.02444.pdf | jq .
+$ grobidcli -j -S http://localhost:8070 -f testdata/pdf/1906.02444.pdf | jq .
 {
   "grobid_version": "0.8.0",
   "grobid_ts": "2024-08-27T16:56+0000",
