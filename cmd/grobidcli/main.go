@@ -112,7 +112,7 @@ func main() {
 ▓  ▓▓▓   ▓▓       ▓▓▓  ▓▓▓▓  ▓▓       ▓▓▓▓▓▓  ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓
 █  ████  ██  ███  ███  ████  ██  ████  █████  █████  ████  ██  ████  ██  ███████████  ████
 ██      ███  ████  ███      ███       ███        ██       ████      ███        ██        █
-`)
+        `)
 		fmt.Fprintln(os.Stderr, "grobidcli | valid service (-s) names:")
 		fmt.Fprintln(os.Stderr)
 		for _, s := range grobidclient.ValidServices {
@@ -137,7 +137,7 @@ Process a single PDF file and get back JSON
 Process a directory of PDF files
 
   $ grobidcli -d testdata/pdf
-`)
+        `)
 	}
 	flag.Parse()
 	if *showVersion {
