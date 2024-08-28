@@ -1,3 +1,5 @@
+//go:build (linux || darwin) && amd64
+
 package grobidclient
 
 import (
