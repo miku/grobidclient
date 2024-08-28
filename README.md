@@ -8,7 +8,7 @@ install the CLI:
 $ go install github.com/miku/grodidclient/cmd/grobidcli@latest
 ```
 
-This library includes functions:
+This CLI and library includes functionality:
 
 * to run parsing on a single PDF file
 * to run parsing recursively on files in a directory
