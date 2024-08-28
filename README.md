@@ -1,7 +1,7 @@
 # grobidclient
 
 A [Go](https://go.dev) client library and CLI for
-[grobid](https://github.com/kermitt2/grobid) document parsing service. To
+[GROBID](https://github.com/kermitt2/grobid) document parsing service. To
 install the CLI:
 
 ```
