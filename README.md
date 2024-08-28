@@ -251,8 +251,8 @@ import (
     }
     switch {
     case *inputFile != "":
-        result, err := grobid.ProcessPDF(*inputFile,
-            *serviceName, opts)
+        result, err := grobid.ProcessPDF("my.pdf",
+            "processFulltextDocument", opts)
         if err != nil {
             log.Fatal(err)
         }
