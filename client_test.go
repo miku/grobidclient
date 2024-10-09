@@ -24,7 +24,7 @@ func TestProcessPDF(t *testing.T) {
 	}
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
-		Image:        "grobid/grobid:0.8.0",
+		Image:        "grobid/grobid:0.8.1",
 		ExposedPorts: []string{"8070/tcp"},
 		WaitingFor:   wait.ForListeningPort("8070/tcp"),
 	}
