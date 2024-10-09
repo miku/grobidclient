@@ -2,8 +2,7 @@
 // done previously in various places, mostly in Python:
 //
 // A) https://pypi.org/project/grobid-tei-xml/ "Python parser and transforms for GROBID-flavor TEI-XML"
-// B) ALLENAI, S2ORC: https://is.gd/8INu3O,
-// https://github.com/allenai/s2orc-doc2json/blob/71c022ed4bed3ffc71d22c2ac5cdbc133ad04e3c/doc2json/grobid2json/tei_to_json.py#L691
+// B) ALLENAI, S2ORC: https://is.gd/8INu3O, https://github.com/allenai/s2orc-doc2json/blob/71c022ed4bed3ffc71d22c2ac5cdbc133ad04e3c/doc2json/grobid2json/tei_to_json.py#L691
 //
 // This library is modeled very closely along the lines of grobid-tei-xml.
 package tei

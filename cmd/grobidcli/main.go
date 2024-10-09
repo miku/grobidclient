@@ -37,7 +37,7 @@ var (
 	timeout            = flag.Duration("T", 60*time.Second, "client timeout")
 	showVersion        = flag.Bool("version", false, "show version")
 	jsonFormat         = flag.Bool("j", false, "output json for a single file")
-	// Flags passed to grobid API.
+	// flags passed to GROBID API
 	generateIDs            = flag.Bool("g-gi", false, "grobid: generate ids")
 	consolidateCitations   = flag.Bool("g-cc", false, "grobid: consolidate citations")
 	consolidateHeader      = flag.Bool("g-ch", false, "grobid: consolidate header")
@@ -61,8 +61,8 @@ func recommendedNumWorkers() int {
 // Config is taken from the Python client implementation, which differs a bit.
 // We do not need sleep time (handled by exponential backoff), and batch size.
 //
-// If a config file is present, server, timeout and coordinates are taken from
-// the file.
+// If a config file is present, server, timeout and coordinates will be taken
+// from there.
 type Config struct {
 	BatchSize    int64    `json:"batch_size"`
 	Coordinates  []string `json:"coordinates"`
@@ -126,15 +126,15 @@ func main() {
 		fmt.Fprintln(os.Stderr)
 		fmt.Fprintln(os.Stderr, `Examples:
 
-Process a single PDF file and get back TEI-XML
+Process a single PDF file and get back TEI-XML:
 
   $ grobidcli -S localhost:8070 -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
 
-Process a single PDF file and get back JSON
+Process a single PDF file and get back JSON (using default server URL):
 
   $ grobidcli -j -f testdata/pdf/062RoisinAronAmericanNaturalist03.pdf
 
-Process a directory of PDF files
+Process a directory of PDF files (using default server URL):
 
   $ grobidcli -d testdata/pdf
         `)
