@@ -1,13 +1,13 @@
 module github.com/miku/grobidclient
 
-go 1.22.5
+go 1.23.0
 
 require github.com/sethgrid/pester v1.2.0
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/beevik/etree v1.4.1
-	github.com/gabriel-vasile/mimetype v1.4.5
+	github.com/beevik/etree v1.6.0
+	github.com/gabriel-vasile/mimetype v1.4.10
 	github.com/slyrz/warc v0.0.0-20150806225202-a50edd19b690
 	github.com/testcontainers/testcontainers-go v0.32.0
 )
@@ -57,9 +57,9 @@ require (
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
-	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
 	google.golang.org/grpc v1.59.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
