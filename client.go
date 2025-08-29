@@ -108,7 +108,7 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 		w.WriteField("segmentSentences", "1")
 	}
 	for _, v := range opts.TEICoordinates {
-		w.WriteField("teiCoordinates", v)
+		w.WriteField("teiCoordinates", v) // TODO: correct to just repeat?
 	}
 }
 
@@ -153,7 +153,7 @@ func New(server string) *Grobid {
 	}
 }
 
-// Grobid client, embedding an HTTP client for flexibility.
+// Grobid client, with an own HTTP client for flexibility.
 type Grobid struct {
 	Server string
 	Client Doer
@@ -188,8 +188,8 @@ func (g *Grobid) Pingmoji() string {
 	}
 }
 
-// withoutExt returns the given file or path without the extension.
-func withoutExt(filepath string) string {
+// trimExt returns the given file or path without the extension.
+func trimExt(filepath string) string {
 	return strings.TrimSuffix(filepath, path.Ext(filepath))
 }
 
@@ -197,9 +197,9 @@ func withoutExt(filepath string) string {
 // output is written in the same directory as the input file.
 func outputFilename(filepath string, opts *Options) string {
 	if opts.OutputDir == "" {
-		return withoutExt(filepath) + "." + DefaultExt
+		return trimExt(filepath) + "." + DefaultExt
 	} else {
-		return path.Join(opts.OutputDir, withoutExt(path.Base(filepath))+"."+DefaultExt)
+		return path.Join(opts.OutputDir, trimExt(path.Base(filepath))+"."+DefaultExt)
 	}
 }
 

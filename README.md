@@ -214,7 +214,7 @@ By default, for each PDF file a separate file is written to a file with the
 ## Example library usage
 
 Package documentation on
-[pkg.go.dev](https://pkg.go.dev/github.com/miku/grobidclient). Example takes
+[pkg.go.dev](https://pkg.go.dev/github.com/miku/grobidclient). Example taken
 from the [grobidcli
 tool](https://github.com/miku/grobidclient/blob/main/cmd/grobidcli/main.go).
 
