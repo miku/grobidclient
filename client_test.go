@@ -24,7 +24,7 @@ func TestProcessPDF(t *testing.T) {
 	}
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
-		Image:        "grobid/grobid:0.8.1",
+		Image:        "grobid/grobid:0.8.2", // https://grobid.readthedocs.io/en/latest/Grobid-docker/
 		ExposedPorts: []string{"8070/tcp"},
 		WaitingFor:   wait.ForListeningPort("8070/tcp"),
 	}
