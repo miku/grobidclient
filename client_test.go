@@ -33,20 +33,20 @@ func TestProcessPDF(t *testing.T) {
 		Started:          true,
 	})
 	if err != nil {
-		t.Fatalf("Could not start grobid: %s", err)
+		t.Fatalf("could not start grobid: %s", err)
 	}
 	defer func() {
 		if err := grobidC.Terminate(ctx); err != nil {
-			t.Fatalf("Could not stop grobid: %s", err)
+			t.Fatalf("could not stop grobid: %s", err)
 		}
 	}()
 	ip, err := grobidC.Host(ctx)
 	if err != nil {
-		t.Fatalf("TC: count not get host: %v", err)
+		t.Fatalf("tc: count not get host: %v", err)
 	}
 	port, err := grobidC.MappedPort(ctx, "8070")
 	if err != nil {
-		t.Fatalf("TC: count not get port: %v", err)
+		t.Fatalf("tc: count not get port: %v", err)
 	}
 	hostPort := fmt.Sprintf("http://%s:%s", ip, port.Port())
 	t.Logf("starting e2e test, using grobid container running at %v", hostPort)
