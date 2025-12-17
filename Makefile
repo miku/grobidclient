@@ -3,6 +3,7 @@ TARGETS := grobidcli
 
 .PHONY: test
 test:
+	# to run afresh, may want to append: -count 1
 	go test -short -v -cover ./...
 
 .PHONY: cover
