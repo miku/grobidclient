@@ -48,6 +48,8 @@ var (
 	// TODO: add teicoordniates
 )
 
+const defaultTimeout = 60 * time.Second
+
 func recommendedNumWorkers() int {
 	// keep the concurrency at the client (number of simultaneous calls)
 	// slightly higher than the available number of threads at the server side,
@@ -71,11 +73,12 @@ type Config struct {
 	Timeout      int64    `json:"timeout"`
 }
 
-// Timeout returns the timeout as a time.Duration.
+// TimeoutDuration returns the timeout as a time.Duration.
 func (c *Config) TimeoutDuration() time.Duration {
 	dur, err := time.ParseDuration(fmt.Sprintf("%ds", c.Timeout))
 	if err != nil {
-		panic(err)
+		log.Printf("failed to parse timeout: %w, falling back to default: %v", err, defaultTimeout)
+		return defaultTimeout
 	}
 	return dur
 }
