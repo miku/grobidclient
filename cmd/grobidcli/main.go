@@ -191,7 +191,7 @@ Process a directory of PDF files (using default server URL):
 		ConsolidateHeader:      *consolidateHeader,
 		ConsolidateCitations:   *consolidateCitations,
 		IncludeRawCitations:    *includeRawCitations,
-		IncluseRawAffiliations: *includeRawAffiliations,
+		IncludeRawAffiliations: *includeRawAffiliations,
 		TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,

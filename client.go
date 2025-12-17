@@ -62,7 +62,7 @@ var DefaultOptions = &Options{
 	ConsolidateHeader:      true,
 	ConsolidateCitations:   true,
 	IncludeRawCitations:    true,
-	IncluseRawAffiliations: true,
+	IncludeRawAffiliations: true,
 	TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
 	SegmentSentences:       true,
 	Force:                  false,
@@ -78,7 +78,7 @@ type Options struct {
 	ConsolidateHeader      bool
 	ConsolidateCitations   bool
 	IncludeRawCitations    bool
-	IncluseRawAffiliations bool
+	IncludeRawAffiliations bool
 	TEICoordinates         []string // https://grobid.readthedocs.io/en/latest/Coordinates-in-PDF/
 	SegmentSentences       bool
 	Force                  bool
@@ -101,7 +101,7 @@ func (opts *Options) writeFields(w *multipart.Writer) {
 	if opts.IncludeRawCitations {
 		w.WriteField("includeRawCitations", "1")
 	}
-	if opts.IncluseRawAffiliations {
+	if opts.IncludeRawAffiliations {
 		w.WriteField("includeRawAffiliations", "1")
 	}
 	if opts.SegmentSentences {
