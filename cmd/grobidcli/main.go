@@ -48,7 +48,11 @@ var (
 	// TODO: add teicoordniates
 )
 
-const defaultTimeout = 60 * time.Second
+const (
+	defaultTimeout = 60 * time.Second
+	pingTimeout    = 5 * time.Second
+	pingMaxRetry   = 1
+)
 
 func recommendedNumWorkers() int {
 	// keep the concurrency at the client (number of simultaneous calls)
@@ -77,7 +81,7 @@ type Config struct {
 func (c *Config) TimeoutDuration() time.Duration {
 	dur, err := time.ParseDuration(fmt.Sprintf("%ds", c.Timeout))
 	if err != nil {
-		log.Printf("failed to parse timeout: %w, falling back to default: %v", err, defaultTimeout)
+		log.Printf("failed to parse timeout: %v, falling back to default: %v", err, defaultTimeout)
 		return defaultTimeout
 	}
 	return dur
@@ -168,8 +172,8 @@ Process a directory of PDF files (using default server URL):
 	switch {
 	case *doPing:
 		// Ping should come back fast.
-		hc.Timeout = 5 * time.Second
-		client.MaxRetries = 1
+		hc.Timeout = pingTimeout
+		client.MaxRetries = pingMaxRetry
 		client.Backoff = pester.ExponentialBackoff
 		client.RetryOnHTTP429 = false
 	default:

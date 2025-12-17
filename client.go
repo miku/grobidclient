@@ -375,11 +375,11 @@ func (g *Grobid) ProcessDirRecursive(dir, service string, numWorkers int, rf Res
 
 // isPDF returns true, if the given file is likely a PDF.
 func isPDF(filename string) bool {
-	mtype, err := mimetype.DetectFile(filename)
+	mimeType, err := mimetype.DetectFile(filename)
 	if err != nil {
 		return strings.HasSuffix(strings.ToLower(filename), ".pdf")
 	}
-	return mtype.Is("application/pdf")
+	return mimeType.Is("application/pdf")
 }
 
 // isXML returns true, if the filename is likely an XML file.
