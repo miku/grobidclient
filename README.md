@@ -235,7 +235,7 @@ import (
         ConsolidateHeader:      *consolidateHeader,
         ConsolidateCitations:   *consolidateCitations,
         IncludeRawCitations:    *includeRawCitations,
-        IncluseRawAffiliations: *includeRawAffiliations,
+        IncludeRawAffiliations: *includeRawAffiliations,
         TEICoordinates:         []string{
             "ref",
             "figure",
