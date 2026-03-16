@@ -7,7 +7,7 @@ require github.com/sethgrid/pester v1.2.0
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/beevik/etree v1.6.0
-	github.com/gabriel-vasile/mimetype v1.4.12
+	github.com/gabriel-vasile/mimetype v1.4.13
 	github.com/slyrz/warc v0.0.0-20150806225202-a50edd19b690
 	github.com/testcontainers/testcontainers-go v0.40.0
 )
