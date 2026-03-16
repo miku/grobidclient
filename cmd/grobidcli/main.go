@@ -45,7 +45,8 @@ var (
 	includeRawAffiliations = flag.Bool("g-ira", false, "grobid: include raw affiliations")
 	forceReprocess         = flag.Bool("g-force", false, "grobid: force reprocess")
 	segmentSentences       = flag.Bool("g-ss", false, "grobid: segment sentences")
-	// TODO: add teicoordniates
+	// TEICoordinates is the list of coordinates to request from GROBID. Can be
+// overridden by config.
 )
 
 const (
@@ -104,7 +105,7 @@ func (c *Config) FromFile(filename string) error {
 // DefaultConfig is taken from the example in the Python client. Some fields
 // are not used in this client.
 var DefaultConfig = &Config{
-	Coordinates:  []string{"persName", "figure", "ref", "biblStruct", "formula", "s", "note", "title"},
+	Coordinates:  grobidclient.DefaultTEICoordinates,
 	Timeout:      60,
 	GrobidServer: *server,
 	BatchSize:    100, // unused, we use worker threads
@@ -199,7 +200,7 @@ Process a directory of PDF files (using default server URL):
 		ConsolidateCitations:   *consolidateCitations,
 		IncludeRawCitations:    *includeRawCitations,
 		IncludeRawAffiliations: *includeRawAffiliations,
-		TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
+		TEICoordinates:         grobidclient.DefaultTEICoordinates,
 		SegmentSentences:       *segmentSentences,
 		Force:                  *forceReprocess,
 		Verbose:                *verbose,

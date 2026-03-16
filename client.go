@@ -26,6 +26,9 @@ import (
 	"github.com/sethgrid/pester"
 )
 
+// DefaultTEICoordinates are the default coordinates to request from GROBID.
+var DefaultTEICoordinates = []string{"ref", "figure", "persName", "formula", "biblStruct"}
+
 // Version of grobidclient.
 var Version = "0.2.5"
 
@@ -63,7 +66,7 @@ var DefaultOptions = &Options{
 	ConsolidateCitations:   true,
 	IncludeRawCitations:    true,
 	IncludeRawAffiliations: true,
-	TEICoordinates:         []string{"ref", "figure", "persName", "formula", "biblStruct"},
+	TEICoordinates:         DefaultTEICoordinates,
 	SegmentSentences:       true,
 	Force:                  false,
 	Verbose:                false,
