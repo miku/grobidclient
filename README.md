@@ -5,7 +5,7 @@ A [Go](https://go.dev) client library and CLI for
 install the CLI:
 
 ```
-$ go install github.com/miku/grodidclient/cmd/grobidcli@latest
+$ go install github.com/miku/grobidclient/cmd/grobidcli@latest
 ```
 
 This CLI and library includes functionality:
