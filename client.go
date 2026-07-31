@@ -30,7 +30,7 @@ import (
 var DefaultTEICoordinates = []string{"ref", "figure", "persName", "formula", "biblStruct"}
 
 // Version of grobidclient.
-var Version = "0.2.5"
+var Version = "0.2.6"
 
 // ErrInvalidService, if the service name is not known.
 var ErrInvalidService = errors.New("invalid service")
